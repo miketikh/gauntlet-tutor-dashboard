@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow read/write access to all files for local development
+    // TODO: Add proper security rules before deploying to production
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

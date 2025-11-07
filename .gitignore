@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# firebase
+emulator-data/
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+ui-debug.log
+*.log
+
+# Ignore agent / command files
+.claude/
