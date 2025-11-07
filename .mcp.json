@@ -13,13 +13,9 @@
         "@upstash/context7-mcp"
       ]
     },
-    "firebase": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "firebase-tools@latest",
-        "mcp"
-      ]
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp"
     }
   }
 }
