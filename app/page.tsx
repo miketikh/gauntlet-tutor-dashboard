@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 import {
   BarChart3,
   TrendingUp,
@@ -47,10 +48,14 @@ export default function LandingPage() {
             </a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-sm font-medium">
-              Sign In
-            </Button>
-            <Button className="text-sm font-semibold">Get Started</Button>
+            <Link href="/auth/sign-in">
+              <Button variant="ghost" className="text-sm font-medium">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/auth/sign-up">
+              <Button className="text-sm font-semibold">Get Started</Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -72,13 +77,17 @@ export default function LandingPage() {
                 actionable insights within 1 hour of session completion.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" className="text-base font-semibold">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-base font-semibold bg-transparent">
-                  Watch Demo
-                </Button>
+                <Link href="/auth/sign-up">
+                  <Button size="lg" className="text-base font-semibold">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/auth/sign-up">
+                  <Button size="lg" variant="outline" className="text-base font-semibold bg-transparent">
+                    Watch Demo
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center gap-6 pt-2">
                 <div className="flex items-center gap-2">
@@ -376,17 +385,21 @@ export default function LandingPage() {
                 outcomes.
               </p>
               <div className="flex flex-col justify-center gap-3 sm:flex-row">
-                <Button size="lg" variant="secondary" className="text-base font-semibold">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Schedule Demo
-                </Button>
+                <Link href="/auth/sign-up">
+                  <Button size="lg" variant="secondary" className="text-base font-semibold">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/auth/sign-up">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                  >
+                    Schedule Demo
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>
