@@ -1,5 +1,10 @@
 # Tutor Quality Scoring System - Implementation Plan
 
+## Current Status
+**Phase 1: Complete ✅** - Database schema, dependencies installed, seed data created
+**Phase 2: Ready to Start** - Authentication & Application Shell
+**Tech Stack Update**: Migrated from Firebase to Supabase for better relational database integration
+
 ## Overview
 This document outlines the phased approach for building the Tutor Quality Scoring System MVP (Admin view only). The plan prioritizes data foundation, front-loads manual approval tasks, and identifies parallelization opportunities.
 
@@ -15,9 +20,10 @@ This document outlines the phased approach for building the Tutor Quality Scorin
 - Drizzle chosen over Prisma for lighter weight, better performance with complex queries, and TypeScript-first approach
 
 ### Authentication
-- **Firebase Authentication** with Firebase Admin SDK
-- Manual HttpOnly cookie setup for server-side auth state
+- **Supabase Authentication** with Supabase SSR package
+- Built-in session management with HttpOnly cookies
 - Simple `getServerAuth()` helper for Server Components
+- Row Level Security (RLS) integration with PostgreSQL
 
 ### UI & Styling
 - **shadcn/ui** for components (copy-paste approach, no runtime overhead)
@@ -45,61 +51,66 @@ This document outlines the phased approach for building the Tutor Quality Scorin
 - **@tanstack/react-table** for complex data tables
 
 ### Architecture Pattern
-- **Data Flow**: Server Components → Service Layer → Drizzle/Firebase → Database
+- **Data Flow**: Server Components → Service Layer → Drizzle/Supabase → Database
 - **Service Layer**: Business logic and data aggregation in `services/` directory
 - **No API Routes**: Server Components fetch directly (API routes only if external access needed)
-- **Folder Structure**: `app/` (pages), `services/` (business logic), `lib/` (db, firebase, utils)
+- **Folder Structure**: `app/` (pages), `services/` (business logic), `lib/` (db, supabase, utils)
 
 ---
 
-## Phase 1: Foundation & Data Layer
+## Phase 1: Foundation & Data Layer ✅ COMPLETE
 **Goal**: Establish type system and seed database with realistic mock data
 
 **Priority**: CRITICAL - All subsequent work depends on this phase
 
+**Status**: ✅ All tasks completed with Supabase integration
+
 ### 1.1 Type Definitions & Database Schema
-- [ ] Define all TypeScript interfaces (User, Tutor, Student, Session, etc.)
-- [ ] Create database schema files (SQL/migration scripts)
-- [ ] Set up database connection configuration
-- [ ] Define enums for reusable constants
+- [x] Define all TypeScript interfaces (User, Tutor, Student, Session, etc.)
+- [x] Create database schema files (SQL/migration scripts)
+- [x] Set up database connection configuration
+- [x] Define enums for reusable constants
 
 **Manual Approval Required**: Database schema review
 
 ### 1.2 Package Dependencies & Configuration
-- [ ] Install Firebase SDK for authentication
-- [ ] Install database client (PostgreSQL/MySQL)
-- [ ] Install UI component library (if using one)
-- [ ] Install charting library for performance graphs
-- [ ] Set up environment variables template
+- [x] Install Supabase SDK for authentication (@supabase/supabase-js, @supabase/ssr)
+- [x] Install database client (PostgreSQL with Drizzle ORM)
+- [x] Install UI component libraries (shadcn/ui dependencies, Tailwind CSS)
+- [x] Install charting library for performance graphs (Recharts)
+- [x] Set up environment variables template
 
 **Manual Approval Required**: Package selection and installation
 
 ### 1.3 Mock Data Generation
-- [ ] Design tutor personas (star, solid, struggling, at-risk)
-- [ ] Create mock data generator with correlation rules
-- [ ] Generate 10 tutors, 40 students, 200 sessions
-- [ ] Implement temporal patterns and realistic distributions
-- [ ] Seed database with generated data
+- [x] Design tutor personas (star, solid, struggling, at-risk)
+- [x] Create mock data generator with correlation rules
+- [x] Generate 6 tutors, 20 students, 150 sessions (adjusted for MVP)
+- [x] Implement temporal patterns and realistic distributions
+- [x] Seed database with generated data
 
-**Manual Approval Required**: Mock data validation and seeding strategy
+**Manual Approval Required**: Mock data validation and seeding strategy ✅ Complete
 
-**Deliverable**: Fully populated database with realistic, correlated mock data
+**Deliverable**: ✅ Fully populated database with realistic, correlated mock data
+- Created comprehensive seed data system in `scripts/seed/`
+- Generated 6 tutors, 20 students, ~150 sessions with realistic patterns
+- Full documentation available in `docs/seeding_data_overview.md`
 
 ---
 
 ## Phase 2: Authentication & Application Shell
-**Goal**: Set up Firebase auth and basic application structure
+**Goal**: Set up Supabase auth and basic application structure
 
-**Dependencies**: Phase 1 complete
+**Dependencies**: Phase 1 complete ✅
 
-### 2.1 Firebase Authentication
-- [ ] Configure Firebase project
+### 2.1 Supabase Authentication
+- [ ] Configure Supabase project
 - [ ] Implement login page
-- [ ] Create auth context/provider
-- [ ] Set up protected routes for admin
+- [ ] Create auth context/provider with Supabase SSR
+- [ ] Set up protected routes for admin with RLS policies
 - [ ] Create 3-5 seed users (admin role)
 
-**Manual Approval Required**: Firebase project setup
+**Manual Approval Required**: Supabase project setup
 
 ### 2.2 Basic Application Layout
 - [ ] Create main navigation structure
@@ -239,9 +250,9 @@ All component groups (3.1, 3.2, 3.3) can be built simultaneously
 
 ## Manual Approval Checkpoints
 
-1. **Before Phase 1 execution**: Database schema, package dependencies
-2. **End of Phase 1**: Mock data validation and seeding
-3. **Before Phase 2**: Firebase project configuration
+1. ~~**Before Phase 1 execution**: Database schema, package dependencies~~ ✅ Complete
+2. ~~**End of Phase 1**: Mock data validation and seeding~~ ✅ Complete
+3. **Before Phase 2**: Supabase project configuration (Ready for setup)
 4. **End of Phase 4**: Feature completeness review
 5. **End of Phase 5**: Production readiness
 

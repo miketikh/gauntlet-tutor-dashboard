@@ -12,9 +12,11 @@
     "db:reset": "npx supabase db reset",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "seed": "tsx scripts/seed/index.ts"
   },
   "dependencies": {
+    "dotenv": "^16.4.8",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.80.0",
@@ -48,6 +50,7 @@
     "eslint-config-next": "16.0.1",
     "supabase": "^2.54.11",
     "tailwindcss": "^4",
+    "tsx": "^4.20.1",
     "typescript": "^5"
   }
 }
