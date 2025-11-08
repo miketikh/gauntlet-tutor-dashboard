@@ -4,7 +4,7 @@ export interface CorrelationEffect {
   multiply?: number;
   add?: number;
   subtract?: number;
-  set?: number;
+  set?: number | boolean | null;
   increase?: number; // Increase probability by this amount
   decrease?: number; // Decrease probability by this amount
 }

@@ -133,7 +133,7 @@ export class SeededRandom {
     base: number,
     modifiers?: Record<string, number>,
     conditions?: Record<string, boolean>
-  ): boolean {
+  ): number {
     let probability = base;
 
     if (modifiers && conditions) {
@@ -145,7 +145,7 @@ export class SeededRandom {
       }
     }
 
-    return this.boolean(probability);
+    return probability;
   }
 }
 

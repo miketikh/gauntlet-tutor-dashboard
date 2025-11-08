@@ -176,29 +176,35 @@ export class SessionFactory {
       new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
 
-    return this.random.applyProbability(
+    const probability = this.random.applyProbability(
       sessionTraitProbabilities.technicalIssues.base,
       sessionTraitProbabilities.technicalIssues.modifiers,
       { ifFirstWeek: isFirstWeek }
     );
+
+    return this.random.boolean(probability);
   }
 
   // Determine video availability
   private determineVideoAvailability(hasTechIssues: boolean): boolean {
-    return this.random.applyProbability(
+    const probability = this.random.applyProbability(
       sessionTraitProbabilities.hasVideoAnalysis.base,
       sessionTraitProbabilities.hasVideoAnalysis.modifiers,
       { ifTechnicalIssues: hasTechIssues }
     );
+
+    return this.random.boolean(probability);
   }
 
   // Determine screen monitoring availability
   private determineScreenAvailability(hasTechIssues: boolean): boolean {
-    return this.random.applyProbability(
+    const probability = this.random.applyProbability(
       sessionTraitProbabilities.hasScreenMonitoring.base,
       sessionTraitProbabilities.hasScreenMonitoring.modifiers,
       { ifTechnicalIssues: hasTechIssues }
     );
+
+    return this.random.boolean(probability);
   }
 
   // Estimate session quality based on personas
@@ -232,7 +238,7 @@ export class SessionFactory {
   private determineHomeworkAssigned(status: string, sessionQuality: number): boolean {
     if (status !== 'completed') return false;
 
-    return this.random.applyProbability(
+    const probability = this.random.applyProbability(
       sessionTraitProbabilities.homeworkAssigned.base,
       sessionTraitProbabilities.homeworkAssigned.modifiers,
       {
@@ -241,6 +247,8 @@ export class SessionFactory {
         ifNoShow: false,
       }
     );
+
+    return this.random.boolean(probability);
   }
 
   // Determine if follow-up was booked
@@ -251,7 +259,7 @@ export class SessionFactory {
   ): boolean {
     if (status !== 'completed') return false;
 
-    return this.random.applyProbability(
+    const probability = this.random.applyProbability(
       sessionTraitProbabilities.followUpBooked.base,
       sessionTraitProbabilities.followUpBooked.modifiers,
       {
@@ -261,6 +269,8 @@ export class SessionFactory {
         ifNoShow: false,
       }
     );
+
+    return this.random.boolean(probability);
   }
 
   // Generate technical issue description

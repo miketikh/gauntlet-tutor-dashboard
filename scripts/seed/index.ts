@@ -144,7 +144,7 @@ async function seed() {
       await db.insert(students).values({
         user_id: student.userId,
         enrolled_since: student.enrolledSince.toISOString().split('T')[0],
-        grade_level: student.gradeLevel,
+        grade_level: student.gradeLevel as any,
         parent_email: student.parentEmail,
         bio: student.bio,
         learning_goals: student.learningGoals,

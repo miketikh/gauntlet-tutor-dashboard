@@ -34,7 +34,7 @@ export interface GeneratedTutor {
 export interface GeneratedStudent {
   userId: string;
   enrolledSince: Date;
-  gradeLevel?: string;
+  gradeLevel?: '6th' | '7th' | '8th' | '9th' | '10th' | '11th' | '12th' | 'college' | 'adult';
   parentEmail?: string;
   bio?: string;
   learningGoals?: string;
@@ -266,8 +266,8 @@ export class UserGenerator {
     return this.random.int(range.min, range.max);
   }
 
-  private generateGradeLevel(): string {
-    const grades = ['6th', '7th', '8th', '9th', '10th', '11th', '12th', 'college'];
+  private generateGradeLevel(): '6th' | '7th' | '8th' | '9th' | '10th' | '11th' | '12th' | 'college' | 'adult' {
+    const grades: Array<'6th' | '7th' | '8th' | '9th' | '10th' | '11th' | '12th' | 'college' | 'adult'> = ['6th', '7th', '8th', '9th', '10th', '11th', '12th', 'college'];
     return this.random.pick(grades);
   }
 
