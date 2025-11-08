@@ -16,8 +16,8 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { href: '/tutors', label: 'Tutors', icon: GraduationCap },
-    { href: '/students', label: 'Students', icon: Users },
+    { href: '/dashboard/tutors', label: 'Tutors', icon: GraduationCap },
+    { href: '/dashboard/students', label: 'Students', icon: Users },
     { href: '/dashboard/sessions', label: 'Sessions', icon: FileText },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     { href: '/dashboard/generate', label: 'Generate', icon: Database },
@@ -67,10 +67,12 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
           <span className="hidden sm:inline text-sm text-muted-foreground">
             {userEmail}
           </span>
-          <Button variant="ghost" size="sm" className="gap-2" onClick={onSignOut}>
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
+          <form action={onSignOut}>
+            <Button variant="ghost" size="sm" className="gap-2" type="submit">
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </form>
         </div>
       </div>
 

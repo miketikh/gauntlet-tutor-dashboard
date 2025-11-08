@@ -28,7 +28,7 @@ export async function TutorsNeedingAttention() {
         return (
           <Link
             key={tutor.user_id}
-            href={`/tutors/${tutor.user_id}`}
+            href={`/dashboard/tutors/${tutor.user_id}`}
             className="block"
           >
             <div

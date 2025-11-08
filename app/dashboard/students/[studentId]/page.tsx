@@ -108,7 +108,7 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
     <>
       {/* Page Header with Back Button */}
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/students">
+        <Link href="/dashboard/students">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Students

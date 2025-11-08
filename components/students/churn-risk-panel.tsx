@@ -200,7 +200,7 @@ export function ChurnRiskPanel({ assessment, studentId }: ChurnRiskPanelProps) {
         {/* Action Link */}
         <div className="pt-4 border-t border-border">
           <Button variant="outline" className="w-full" asChild>
-            <a href={`/students/${studentId}/risk-analysis`}>
+            <a href={`/dashboard/students/${studentId}/risk-analysis`}>
               View detailed risk analysis
               <ChevronRight className="ml-2 h-4 w-4" />
             </a>

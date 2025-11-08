@@ -105,7 +105,7 @@ export function TutorHistoryList({ tutorHistory, currentTutorId }: TutorHistoryL
                   {/* Tutor Name and Current Badge */}
                   <div className="flex items-center justify-between">
                     <Link
-                      href={`/tutors/${tutor.tutor_id}`}
+                      href={`/dashboard/tutors/${tutor.tutor_id}`}
                       className="text-lg font-semibold text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {tutor.tutor_name}

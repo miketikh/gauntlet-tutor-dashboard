@@ -58,7 +58,7 @@ export default function SessionHeader({ sessionData }: SessionHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Tutor</p>
                 <Link
-                  href={`/tutors/${session.tutor_id}`}
+                  href={`/dashboard/tutors/${session.tutor_id}`}
                   className="text-base font-medium text-primary hover:underline"
                 >
                   Tutor #{session.tutor_id.slice(0, 8)}

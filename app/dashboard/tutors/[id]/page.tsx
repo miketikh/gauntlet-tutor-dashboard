@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 import { getTutorDetailById, getTutorPerformanceTrends, getTutorInsightsData, getTutorAlertsData, getCoachingNotes } from "@/services/tutor-service"
 import { getSessionsByTutorId } from "@/services/session-service"
 import { PageHeader } from "@/components/ui/page-header"
@@ -54,14 +53,6 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function TutorDetailPage({ params }: PageProps) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/auth/sign-in")
-  }
-
   // Await params in Next.js 15
   const { id } = await params
 
@@ -76,7 +67,7 @@ export default async function TutorDetailPage({ params }: PageProps) {
   ])
 
   if (!tutorDetail) {
-    redirect("/tutors")
+    redirect("/dashboard/tutors")
   }
 
   // Calculate rating divergence warning
@@ -91,30 +82,17 @@ export default async function TutorDetailPage({ params }: PageProps) {
   const subjectsList = tutorDetail.subjects.map(s => s.name).join(", ")
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 md:px-6">
-          <PageHeader
-            title={tutorDetail.preferred_name || tutorDetail.name}
-            description={subjectsList}
-            breadcrumbs={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "Tutors", href: "/tutors" },
-              { label: tutorDetail.name },
-            ]}
-            actions={
-              <Button variant="outline" size="sm" className="gap-2">
-                <Mail className="h-4 w-4" />
-                Contact
-              </Button>
-            }
-          />
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 md:px-6">
+    <>
+      <PageHeader
+        title={tutorDetail.preferred_name || tutorDetail.name}
+        description={subjectsList}
+        actions={
+          <Button variant="outline" size="sm" className="gap-2">
+            <Mail className="h-4 w-4" />
+            Contact
+          </Button>
+        }
+      />
         {/* Tutor Header Section */}
         <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           {/* Left: Profile Info */}
@@ -485,7 +463,6 @@ export default async function TutorDetailPage({ params }: PageProps) {
             </div>
           )}
         </SectionContainer>
-      </main>
-    </div>
+    </>
   )
 }

@@ -55,7 +55,7 @@ export async function PlatformMetricsBar() {
           variant={stat.variant}
         />
       ))}
-      <Link href="/tutors?churnRisk=high,medium" className="block">
+      <Link href="/dashboard/tutors?churnRisk=high,medium" className="block">
         <MetricCard
           title="Tutor Churn Risk Count"
           value={metrics.tutorChurnRiskCount}

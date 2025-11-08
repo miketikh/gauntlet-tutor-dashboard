@@ -37,7 +37,7 @@ export async function TopPerformersList() {
         return (
           <Link
             key={performer.user_id}
-            href={`/tutors/${performer.user_id}`}
+            href={`/dashboard/tutors/${performer.user_id}`}
             className="block"
           >
             <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent">

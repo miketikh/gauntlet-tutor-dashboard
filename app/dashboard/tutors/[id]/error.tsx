@@ -57,7 +57,7 @@ export default function TutorDetailError({
                 <Button onClick={reset} variant="default">
                   Try Again
                 </Button>
-                <Link href="/tutors">
+                <Link href="/dashboard/tutors">
                   <Button variant="outline">
                     Back to Tutors
                   </Button>

@@ -110,7 +110,7 @@ export function StudentSessionHistory({ sessions, tutorSwitches }: StudentSessio
           return (
             <div className="flex items-center gap-2">
               <Link
-                href={`/tutors/${row.original.tutor_id}`}
+                href={`/dashboard/tutors/${row.original.tutor_id}`}
                 className="text-blue-600 hover:underline dark:text-blue-400"
               >
                 {row.original.tutor_name}
