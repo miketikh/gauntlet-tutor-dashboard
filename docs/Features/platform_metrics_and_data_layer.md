@@ -63,26 +63,26 @@ This phase establishes the foundational service layer structure and core data ac
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/index.ts`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/session-service.ts`
-- [ ] Implement `getSessionById(sessionId: string)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/session-service.ts`
+- [x] Implement `getSessionById(sessionId: string)`:
   - Fetch session with all related metrics (audio, video, screen, feedback, transcript highlights)
   - Use Drizzle's `eq()` and leftJoin for optional metrics
   - Return typed `SessionWithMetrics` interface
   - Handle cases where video/screen metrics don't exist (return null for those fields)
-- [ ] Implement `getSessionsByTutorId(tutorId: string, options?)`:
+- [x] Implement `getSessionsByTutorId(tutorId: string, options?)`:
   - Support optional filters: status, date range, limit, offset
   - Order by scheduled_start DESC by default
   - Include session score and basic metrics (no full joins)
   - Return array of `SessionSummary` interface
-- [ ] Implement `getSessionsByStudentId(studentId: string, options?)`:
+- [x] Implement `getSessionsByStudentId(studentId: string, options?)`:
   - Similar to tutor version but student-focused
   - Include tutor name/id in response
   - Track session_number for progression
-- [ ] Implement `getRecentSessions(limit: number, filters?)`:
+- [x] Implement `getRecentSessions(limit: number, filters?)`:
   - Support filters: status (completed/all), flagged_only (score < 6.5), date range
   - Include tutor name, student ID, subject name via joins
   - Efficient query with proper limits
-- [ ] Define TypeScript interfaces for all return types at top of file
+- [x] Define TypeScript interfaces for all return types at top of file
 
 **What to Test:**
 1. Build project - verify no TypeScript errors
@@ -110,29 +110,29 @@ This phase establishes the foundational service layer structure and core data ac
 - `/Users/mike/gauntlet/tutor-dashboard/services/session-service.ts` (completed in PR 1.1)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`
-- [ ] Implement `getTutorById(tutorId: string)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`
+- [x] Implement `getTutorById(tutorId: string)`:
   - Fetch tutor with user info, subjects, basic profile data
   - Join with tutor_subjects and subjects table
   - Return `TutorProfile` interface with user details
-- [ ] Implement `getAllTutors(options?)`:
+- [x] Implement `getAllTutors(options?)`:
   - Support filters: active_only, subject_id
   - Include user name and email
   - Order by member_since DESC
   - Return array of `TutorSummary` interface
-- [ ] Implement `getTutorSubjects(tutorId: string)`:
+- [x] Implement `getTutorSubjects(tutorId: string)`:
   - Fetch all subjects this tutor teaches
   - Return array of Subject objects
-- [ ] Implement `getTutorSessionCount(tutorId: string, options?)`:
+- [x] Implement `getTutorSessionCount(tutorId: string, options?)`:
   - Count sessions with optional filters (status, date range)
   - Use Drizzle's `count()` aggregation
   - Return number
-- [ ] Implement `getTutorPerformanceSnapshots(tutorId: string, periodType?, days?)`:
+- [x] Implement `getTutorPerformanceSnapshots(tutorId: string, periodType?, days?)`:
   - Fetch pre-aggregated snapshots from tutor_performance_snapshots table
   - Default to last 30 days, weekly periods
   - Order by snapshot_date DESC
   - Return array of snapshot objects for charting
-- [ ] Define TypeScript interfaces for all return types
+- [x] Define TypeScript interfaces for all return types
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -160,28 +160,28 @@ This phase establishes the foundational service layer structure and core data ac
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/types.ts`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`
-- [ ] Implement `getStudentById(studentId: string)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`
+- [x] Implement `getStudentById(studentId: string)`:
   - Fetch student with user info, subjects, status
   - Include churn reasons if status is 'churned'
   - Return `StudentProfile` interface
-- [ ] Implement `getAllStudents(options?)`:
+- [x] Implement `getAllStudents(options?)`:
   - Support filters: status (active/churned/paused), grade_level
   - Include user name and enrolled_since
   - Order by enrolled_since DESC
   - Return array of `StudentSummary` interface
-- [ ] Implement `getStudentChurnReasons(studentId: string)`:
+- [x] Implement `getStudentChurnReasons(studentId: string)`:
   - Fetch all churn reasons for student from junction table
   - Return array of ChurnReasonType
-- [ ] Implement `getStudentTutorHistory(studentId: string)`:
+- [x] Implement `getStudentTutorHistory(studentId: string)`:
   - Query sessions grouped by tutor_id
   - Return list of tutors this student has worked with
   - Include count of sessions with each tutor
   - Detect tutor switches (session_number resets)
-- [ ] Implement `getStudentSessionCount(studentId: string, options?)`:
+- [x] Implement `getStudentSessionCount(studentId: string, options?)`:
   - Count sessions with optional filters
   - Similar to tutor version but student-focused
-- [ ] Define TypeScript interfaces for all return types
+- [x] Define TypeScript interfaces for all return types
 
 **What to Test:**
 1. Build project - verify TypeScript compilation
@@ -215,28 +215,28 @@ This phase implements the calculation logic for all metrics displayed in the UI,
 - `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` (lines 34-65 for platform health metrics)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/platform-service.ts`
-- [ ] Implement `getPlatformHealthMetrics(dateRange?)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/platform-service.ts`
+- [x] Implement `getPlatformHealthMetrics(dateRange?)`:
   - Calculate average session score across all completed sessions
   - Calculate first session convert rate (% of session_number=1 that lead to session_number=2)
   - Count tutors at churn risk (call `getTutorChurnRisk` for each, count highs)
   - Calculate no-show rate (no_show sessions / total scheduled)
   - Calculate trend indicators (compare to previous period)
   - Return `PlatformHealthMetrics` interface
-- [ ] Implement `getTopPerformers(limit: number, dateRange?)`:
+- [x] Implement `getTopPerformers(limit: number, dateRange?)`:
   - Query tutors ordered by average session score DESC
   - Include session count, overall score, tutor name
   - Minimum 5 sessions in period to qualify
   - Return array of `TutorPerformance` interface
-- [ ] Implement `getNeedsAttention(limit: number, dateRange?)`:
+- [x] Implement `getNeedsAttention(limit: number, dateRange?)`:
   - Query tutors with active alerts or low scores (< 6.5)
   - Include alert count, overall score, tutor name
   - Order by severity (critical alerts first, then score)
   - Return array of `TutorAlert` interface
-- [ ] Implement helper: `calculateTrendPercentage(current, previous)`:
+- [x] Implement helper: `calculateTrendPercentage(current, previous)`:
   - Return percentage change with +/- sign
   - Handle divide-by-zero cases
-- [ ] Define TypeScript interfaces for all return types
+- [x] Define TypeScript interfaces for all return types
 
 **What to Test:**
 1. Build project - verify compilation
@@ -266,38 +266,38 @@ This phase implements the calculation logic for all metrics displayed in the UI,
 - `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` (lines 413-451 for calculation rules)
 
 **Tasks:**
-- [ ] Add to `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
-- [ ] Implement `getTutorOverallScore(tutorId: string, dateRange?)`:
+- [x] Add to `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
+- [x] Implement `getTutorOverallScore(tutorId: string, dateRange?)`:
   - Query all session scores for tutor in range
   - Calculate weighted average (recent sessions weighted higher)
   - Use last 30 sessions if no date range specified
   - Return number (0-10) or null if no sessions
-- [ ] Implement `getTutorRebookRate(tutorId: string, dateRange?)`:
+- [x] Implement `getTutorRebookRate(tutorId: string, dateRange?)`:
   - Count completed sessions with follow_up_booked = true
   - Divide by total completed sessions
   - Return percentage (0-100) or null
-- [ ] Implement `getTutorFirstSessionConvertRate(tutorId: string)`:
+- [x] Implement `getTutorFirstSessionConvertRate(tutorId: string)`:
   - Find all first sessions (session_number = 1)
   - Check how many led to session_number = 2 with same student
   - Return percentage (0-100) or null
-- [ ] Implement `getTutorChurnRisk(tutorId: string)`:
+- [x] Implement `getTutorChurnRisk(tutorId: string)`:
   - Count no-shows in last 30 days
   - Count reschedules in last 30 days
   - Count late arrivals (actual_start > scheduled_start + 5 min)
   - Apply thresholds: high (>=2 no-shows OR >=5 reschedules), medium (1 no-show OR 3-4 reschedules), low (else)
   - Return 'low' | 'medium' | 'high'
-- [ ] Implement `getTutorStudentEngagement(tutorId: string, dateRange?)`:
+- [x] Implement `getTutorStudentEngagement(tutorId: string, dateRange?)`:
   - Average of student_engagement_score from session_audio_metrics
   - Only include completed sessions with audio analysis
   - Return number (0-10) or null
-- [ ] Implement `getTutorAvgStudentRating(tutorId: string, dateRange?)`:
+- [x] Implement `getTutorAvgStudentRating(tutorId: string, dateRange?)`:
   - Average of student_satisfaction_rating from session_feedback
   - Only sessions with feedback submitted
   - Return number (1-5) or null if no feedback
-- [ ] Implement `getTutorRatingScoreDivergence(tutorId: string)`:
+- [x] Implement `getTutorRatingScoreDivergence(tutorId: string)`:
   - Calculate abs(avg_student_rating * 2 - overall_score)
   - Return number or null if either metric is missing
-- [ ] Define interfaces for return types
+- [x] Define interfaces for return types
 
 **What to Test:**
 1. Build project - verify compilation
@@ -326,12 +326,12 @@ This phase implements the calculation logic for all metrics displayed in the UI,
 - `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` (lines 534-552 for churn factor categories)
 
 **Tasks:**
-- [ ] Add to `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`:
-- [ ] Implement `getChurnAlgorithmWeights()`:
+- [x] Add to `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`:
+- [x] Implement `getChurnAlgorithmWeights()`:
   - Query latest version from churn_algorithm_weights table
   - Return map of factor_category to weight
   - If no weights exist, return default weights (first_session_satisfaction: 0.25, sessions_completed: 0.15, etc.)
-- [ ] Implement `calculateChurnFactor(studentId, factorCategory, weight)`:
+- [x] Implement `calculateChurnFactor(studentId, factorCategory, weight)`:
   - For each factor category, query relevant data and normalize to 0-1 scale
   - first_session_satisfaction: Get session_number=1 score, normalize (10 = 0 risk, 0 = 1 risk)
   - sessions_completed: More sessions = lower risk (>10 sessions = 0 risk, 0-2 sessions = 1 risk)
@@ -341,20 +341,20 @@ This phase implements the calculation logic for all metrics displayed in the UI,
   - student_engagement: Average engagement score, normalize
   - Calculate contribution_to_risk = weight * normalized_score
   - Return `ChurnFactor` object (from types.ts)
-- [ ] Implement `getStudentChurnRiskScore(studentId: string)`:
+- [x] Implement `getStudentChurnRiskScore(studentId: string)`:
   - Get current algorithm weights
   - Calculate all churn factors
   - Sum contribution_to_risk values
   - Return score 0-100 (multiply by 100)
-- [ ] Implement `getStudentChurnRiskLevel(studentId: string)`:
+- [x] Implement `getStudentChurnRiskLevel(studentId: string)`:
   - Call getStudentChurnRiskScore
   - Apply thresholds: high (>70), medium (40-70), low (<40)
   - Return 'low' | 'medium' | 'high'
-- [ ] Implement `getStudentChurnFactors(studentId: string)`:
+- [x] Implement `getStudentChurnFactors(studentId: string)`:
   - Calculate all factors with full details
   - Separate into risk_factors (negative impact) and protective_factors (positive impact)
   - Return `{ risk_factors: ChurnFactor[], protective_factors: ChurnFactor[] }`
-- [ ] Define interfaces for return types
+- [x] Define interfaces for return types
 
 **What to Test:**
 1. Build project - verify compilation
@@ -390,23 +390,23 @@ This phase implements caching strategies for expensive queries and adds performa
 - `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/lib/cache.ts`
-- [ ] Implement in-memory cache using Map with TTL:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/lib/cache.ts`
+- [x] Implement in-memory cache using Map with TTL:
   - Create `CacheManager` class with get/set/delete/clear methods
   - Each entry stores: value, expiration timestamp
   - Implement automatic cleanup of expired entries
   - Export singleton instance
-- [ ] Implement cache key generation helper:
+- [x] Implement cache key generation helper:
   - `generateCacheKey(prefix: string, params: Record<string, any>)`
   - Deterministic string creation from parameters
   - Example: "platform:health:2024-01-01:2024-01-31"
-- [ ] Implement cache wrapper function:
+- [x] Implement cache wrapper function:
   - `withCache<T>(key, ttlSeconds, fetchFn)` generic function
   - Check cache first, return if valid
   - Call fetchFn if cache miss or expired
   - Store result with TTL
   - Handle errors gracefully
-- [ ] Add TypeScript interfaces for cache types
+- [x] Add TypeScript interfaces for cache types
 
 **What to Test:**
 1. Build project - verify compilation
@@ -434,21 +434,21 @@ This phase implements caching strategies for expensive queries and adds performa
 - `/Users/mike/gauntlet/tutor-dashboard/services/platform-service.ts`
 
 **Tasks:**
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/platform-service.ts`:
-- [ ] Wrap `getPlatformHealthMetrics` with cache:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/platform-service.ts`:
+- [x] Wrap `getPlatformHealthMetrics` with cache:
   - Use 5-minute TTL
   - Cache key includes date range
   - Import and use `withCache` helper
-- [ ] Wrap `getTopPerformers` with cache:
+- [x] Wrap `getTopPerformers` with cache:
   - Use 10-minute TTL
   - Cache key includes limit and date range
-- [ ] Wrap `getNeedsAttention` with cache:
+- [x] Wrap `getNeedsAttention` with cache:
   - Use 5-minute TTL (more critical, needs fresher data)
   - Cache key includes limit and date range
-- [ ] Add cache invalidation function:
+- [x] Add cache invalidation function:
   - `invalidatePlatformCache()` clears all platform-related cache keys
   - Call when new session data is added
-- [ ] Add JSDoc comments explaining caching behavior
+- [x] Add JSDoc comments explaining caching behavior
 
 **What to Test:**
 1. Build project - verify compilation
@@ -476,24 +476,24 @@ This phase implements caching strategies for expensive queries and adds performa
 - `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`
 
 **Tasks:**
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
-- [ ] Wrap `getTutorOverallScore` with cache:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
+- [x] Wrap `getTutorOverallScore` with cache:
   - Use 15-minute TTL
   - Cache key includes tutorId and date range
-- [ ] Wrap `getTutorRebookRate` with cache:
+- [x] Wrap `getTutorRebookRate` with cache:
   - Use 15-minute TTL
-- [ ] Wrap `getTutorFirstSessionConvertRate` with cache:
+- [x] Wrap `getTutorFirstSessionConvertRate` with cache:
   - Use 30-minute TTL (changes infrequently)
-- [ ] Wrap `getTutorChurnRisk` with cache:
+- [x] Wrap `getTutorChurnRisk` with cache:
   - Use 15-minute TTL
-- [ ] Wrap `getTutorStudentEngagement` with cache:
+- [x] Wrap `getTutorStudentEngagement` with cache:
   - Use 15-minute TTL
-- [ ] Wrap `getTutorAvgStudentRating` with cache:
+- [x] Wrap `getTutorAvgStudentRating` with cache:
   - Use 20-minute TTL (feedback comes in slowly)
-- [ ] Add cache invalidation function:
+- [x] Add cache invalidation function:
   - `invalidateTutorCache(tutorId: string)` clears tutor-specific keys
   - Call when tutor completes a new session
-- [ ] Add JSDoc comments explaining caching
+- [x] Add JSDoc comments explaining caching
 
 **What to Test:**
 1. Build project - verify compilation
@@ -521,20 +521,20 @@ This phase implements caching strategies for expensive queries and adds performa
 - `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`
 
 **Tasks:**
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`:
-- [ ] Wrap `getStudentChurnRiskScore` with cache:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/student-service.ts`:
+- [x] Wrap `getStudentChurnRiskScore` with cache:
   - Use 20-minute TTL
   - Cache key includes studentId
-- [ ] Wrap `getStudentChurnFactors` with cache:
+- [x] Wrap `getStudentChurnFactors` with cache:
   - Use 20-minute TTL (same as risk score)
   - Cache key includes studentId
-- [ ] Add cache invalidation function:
+- [x] Add cache invalidation function:
   - `invalidateStudentCache(studentId: string)` clears student-specific keys
   - Call when student completes a new session or provides feedback
-- [ ] Add global cache invalidation function:
+- [x] Add global cache invalidation function:
   - `invalidateChurnAlgorithmCache()` clears all churn calculations
   - Call when algorithm weights are updated
-- [ ] Add JSDoc comments explaining caching
+- [x] Add JSDoc comments explaining caching
 
 **What to Test:**
 1. Build project - verify compilation
@@ -568,22 +568,22 @@ This phase implements the logic for generating alerts and insights based on sess
 - `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` (lines 772-789 for alert thresholds)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/alert-service.ts`
-- [ ] Implement `getActiveAlerts(tutorId: string)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/alert-service.ts`
+- [x] Implement `getActiveAlerts(tutorId: string)`:
   - Query alerts table where resolved = false
   - Order by severity (critical first), then triggered_date DESC
   - Include session link if applicable
   - Return array of `Alert` objects
-- [ ] Implement `getTutorAlertCount(tutorId: string, severity?)`:
+- [x] Implement `getTutorAlertCount(tutorId: string, severity?)`:
   - Count unresolved alerts, optionally filtered by severity
   - Return number
-- [ ] Implement `acknowledgeAlert(alertId: string, acknowledgedBy: string)`:
+- [x] Implement `acknowledgeAlert(alertId: string, acknowledgedBy: string)`:
   - Update alert: acknowledged = true, acknowledged_by = userId, acknowledged_at = now
   - Return updated alert
-- [ ] Implement `resolveAlert(alertId: string, actionTaken: string)`:
+- [x] Implement `resolveAlert(alertId: string, actionTaken: string)`:
   - Update alert: resolved = true, resolved_at = now, action_taken = text
   - Return updated alert
-- [ ] Implement `checkAndGenerateAlerts(tutorId: string)`:
+- [x] Implement `checkAndGenerateAlerts(tutorId: string)`:
   - Check all alert conditions for tutor
   - high_talk_ratio: Query last 10 sessions, check if 70%+ have tutor_talk_ratio > 0.65
   - low_understanding_checks: Check if avg < 4 in last 10 sessions
@@ -593,7 +593,7 @@ This phase implements the logic for generating alerts and insights based on sess
   - declining_performance: Check if avg score dropped >15% over last 30 days vs previous 30 days
   - For each condition met, create alert if one doesn't already exist
   - Return array of newly created alerts
-- [ ] Define TypeScript interfaces
+- [x] Define TypeScript interfaces
 
 **What to Test:**
 1. Build project - verify compilation
@@ -622,13 +622,13 @@ This phase implements the logic for generating alerts and insights based on sess
 - `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` (lines 374-401 for insight categories)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/insight-service.ts`
-- [ ] Implement `getTutorInsights(tutorId: string, insightType?)`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/insight-service.ts`
+- [x] Implement `getTutorInsights(tutorId: string, insightType?)`:
   - Query tutor_insights table where is_active = true
   - Filter by insight_type if provided (strength/growth_area/achievement)
   - Order by detected_at DESC
   - Return array of `TutorInsight` objects
-- [ ] Implement `detectAndGenerateInsights(tutorId: string)`:
+- [x] Implement `detectAndGenerateInsights(tutorId: string)`:
   - Query recent sessions (last 30 days)
   - Detect patterns and generate insights:
   - **Strengths:**
@@ -649,10 +649,10 @@ This phase implements the logic for generating alerts and insights based on sess
   - Store metric_value (the calculated value)
   - Deactivate insights that no longer apply (is_active = false)
   - Return array of newly created/updated insights
-- [ ] Implement `resolveInsight(insightId: string)`:
+- [x] Implement `resolveInsight(insightId: string)`:
   - Update insight: is_active = false, resolved_at = now
   - Return updated insight
-- [ ] Define TypeScript interfaces
+- [x] Define TypeScript interfaces
 
 **What to Test:**
 1. Build project - verify compilation
@@ -671,8 +671,8 @@ This phase implements the logic for generating alerts and insights based on sess
 
 ---
 
-## Phase 5: Testing & Documentation
-
+## (SKIP TESTING, ONLY ADD DOCUMENTATION) Phase 5: Testing & Documentation
+<!-- 
 **Estimated Time:** 2-3 hours
 
 This phase creates comprehensive tests and documentation for the service layer.
@@ -682,9 +682,9 @@ This phase creates comprehensive tests and documentation for the service layer.
 **Goal:** Create test utilities and sample test cases for service functions
 
 **Read these files first:**
-- All service files created in previous PRs
+- All service files created in previous PRs -->
 
-**Tasks:**
+<!-- **Tasks:**
 - [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/__tests__/session-service.test.ts`
 - [ ] Set up test utilities:
   - Mock database connection
@@ -709,8 +709,8 @@ This phase creates comprehensive tests and documentation for the service layer.
 1. Run all tests - verify they pass
 2. Test with empty database - verify graceful handling
 3. Test edge cases - verify no crashes (null values, division by zero, etc.)
-4. Verify type safety - check all return types match interfaces
-
+4. Verify type safety - check all return types match interfaces -->
+<!-- 
 **Files Changed:**
 - NEW: `/Users/mike/gauntlet/tutor-dashboard/services/__tests__/session-service.test.ts` - Session service tests
 - NEW: `/Users/mike/gauntlet/tutor-dashboard/services/__tests__/tutor-service.test.ts` - Tutor service tests
@@ -719,7 +719,7 @@ This phase creates comprehensive tests and documentation for the service layer.
 **Notes:**
 - Use Jest or Vitest (check existing test setup in project)
 - Mock Drizzle database calls for unit tests
-- Integration tests can use test database with seed data
+- Integration tests can use test database with seed data -->
 
 ---
 
@@ -731,25 +731,25 @@ This phase creates comprehensive tests and documentation for the service layer.
 - All service files
 
 **Tasks:**
-- [ ] Add JSDoc comments to all service functions:
+- [x] Add JSDoc comments to all service functions:
   - Function purpose and behavior
   - Parameter descriptions with types
   - Return type description
   - Example usage
   - Notes about caching, performance, edge cases
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/docs/service_layer_guide.md`
-- [ ] Document service architecture:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/docs/service_layer_guide.md`
+- [x] Document service architecture:
   - Overview of service layer pattern
   - File organization and naming conventions
   - How to use services in Server Components
   - Caching strategy explanation
   - Error handling patterns
-- [ ] Create usage examples:
+- [x] Create usage examples:
   - Fetching platform metrics for dashboard
   - Loading tutor profile with all calculations
   - Calculating student churn risk
   - Generating alerts and insights
-- [ ] Document performance characteristics:
+- [x] Document performance characteristics:
   - Which functions are cached and TTL values
   - Which queries are expensive (full table scans)
   - Indexing recommendations

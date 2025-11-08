@@ -58,11 +58,11 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 **Goal:** Extend tutor-service.ts with all data retrieval functions needed for the detail page
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts` to understand existing functions
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/tutors.ts` for tutor data structures
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/alerts.ts` for alert structures
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` lines 69-123 for exact requirements
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts` to understand existing functions
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/tutors.ts` for tutor data structures
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/alerts.ts` for alert structures
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` lines 69-123 for exact requirements
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
   - Add `getTutorDetailById(tutorId: string)` function that returns:
     - User info (name, email, avatar, role)
     - Tutor profile (member_since, bio, subjects, hourly_rate)
@@ -73,25 +73,25 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
     - Array of daily aggregates with: date, avg_session_score, avg_engagement_score, avg_student_satisfaction
     - Use tutor_performance_snapshots if available, otherwise calculate from sessions
     - Fill gaps in data with null (chart handles gracefully)
-  - Add `getTutorInsights(tutorId: string)` function that returns:
+  - Add `getTutorInsightsData(tutorId: string)` function that returns:
     - Strengths: insights where insight_type = 'strength' and is_active = true
     - Growth opportunities: insights where insight_type = 'growth_area' and is_active = true
     - Include display_text, category, detected_at, metric_value, sample_sessions
-  - Add `getTutorAlerts(tutorId: string, includeResolved: boolean = false)` function that returns:
-    - Active alerts: where acknowledged = false OR resolved = false
+  - Add `getTutorAlertsData(tutorId: string, includeResolved: boolean = false)` function that returns:
+    - Active alerts: where resolved = false
     - Optional: include resolved alerts if includeResolved = true
     - Order by severity (critical, warning, info) then triggered_date DESC
     - Include alert_type, title, description, session_id, triggered_date
-- [ ] Add TypeScript interfaces at top of file for all return types:
+- [x] Add TypeScript interfaces at top of file for all return types:
   - `TutorDetailData` interface
   - `TutorPerformanceTrend` interface (date, sessionScore, engagement, satisfaction)
-  - `TutorInsight` interface
-  - `TutorAlert` interface
-- [ ] Implement calculation logic for tutor_churn_risk based on counts:
+  - `TutorInsightData` interface
+  - `TutorAlertData` interface
+- [x] Implement calculation logic for tutor_churn_risk based on counts:
   - Low: no_show_count_30d = 0 AND reschedule_count_30d < 2
   - Medium: no_show_count_30d = 1 OR reschedule_count_30d >= 2
   - High: no_show_count_30d >= 2 OR reschedule_count_30d >= 4
-- [ ] Implement rating_score_divergence calculation:
+- [x] Implement rating_score_divergence calculation:
   - Formula: `abs((avg_student_rating * 2) - overall_score)`
   - Only calculate if avg_student_rating exists (some tutors have no ratings)
 
@@ -119,31 +119,31 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 **Goal:** Create page route and implement tutor header with profile and stats grid
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` to understand header patterns
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/page-header.tsx` for header component
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/stat-grid.tsx` for stats grid
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/score-badge.tsx` for score display
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/risk-badge.tsx` for risk display
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx` with:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` to understand header patterns
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/page-header.tsx` for header component
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/stat-grid.tsx` for stats grid
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/score-badge.tsx` for score display
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/risk-badge.tsx` for risk display
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx` with:
   - Server Component that fetches data using getTutorDetailById
   - Proper error handling for invalid tutor IDs (redirect or 404)
   - Check user is authenticated (use Supabase auth)
-- [ ] Implement tutor header section with:
+- [x] Implement tutor header section with:
   - Name, email (if available), avatar placeholder (use User icon from lucide-react)
   - Overall score displayed with large ScoreBadge component
   - Member since date formatted with date-fns (e.g., "Member since Jan 2024")
   - Contact button (Button with Mail icon) - onClick handler placeholder for future
-- [ ] Implement quick stats grid below header using StatGrid component:
+- [x] Implement quick stats grid below header using StatGrid component:
   - Total Sessions: numeric value
   - Avg Student Rating: star display (5-star scale) with value, show "N/A" if no ratings
   - Student Engagement Score: ScoreBadge with 0-10 scale
   - Rebook Rate: percentage with trend indicator if available
   - Churn Risk Level: RiskBadge with tutor_churn_risk level
-- [ ] Add rating divergence warning badge if threshold exceeded:
+- [x] Add rating divergence warning badge if threshold exceeded:
   - Display only if `rating_score_divergence > 2.0`
   - Badge with AlertTriangle icon and text "Rating/Score Mismatch"
   - Tooltip explaining divergence (future enhancement)
-- [ ] Style page with consistent spacing using Tailwind classes:
+- [x] Style page with consistent spacing using Tailwind classes:
   - Container with max-width and padding
   - Proper gap between header and stats
   - Responsive design (stack on mobile, grid on desktop)
@@ -173,26 +173,26 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 **Goal:** Add 30-day performance trends visualization below header
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/performance-chart.tsx` for chart component
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/section-container.tsx` for section wrapper
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/trend-indicator.tsx` for trend display
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/performance-chart.tsx` for chart component
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/section-container.tsx` for section wrapper
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/trend-indicator.tsx` for trend display
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Fetch performance trends data using getTutorPerformanceTrends(tutorId, 30)
   - Add Performance Trends section after quick stats grid
-- [ ] Implement section with SectionContainer component:
+- [x] Implement section with SectionContainer component:
   - Title: "Performance Trends (Last 30 Days)"
   - Description: "Track session quality, engagement, and satisfaction over time"
-- [ ] Render PerformanceChart component with:
+- [x] Render PerformanceChart component with:
   - Data: trends array from getTutorPerformanceTrends
   - Metrics: ["sessionScore", "engagement", "satisfaction"] (all 3 lines)
   - Height: 300px or responsive
   - Title passed to chart component (optional)
-- [ ] Add trend indicators above chart showing overall trends:
+- [x] Add trend indicators above chart showing overall trends:
   - Calculate trend for each metric (compare avg of last 7 days vs previous 7 days)
   - Display 3 TrendIndicator components horizontally (Session Score, Engagement, Satisfaction)
   - Direction: "up" if improved, "down" if declined, "neutral" if within ±0.3 points
   - Value: show change amount (e.g., "+0.8" or "-0.4")
-- [ ] Handle edge cases:
+- [x] Handle edge cases:
   - New tutors with < 30 days of data: display partial chart with message
   - Tutors with no sessions: show EmptyState component with helpful message
   - Missing data points: chart should handle gaps gracefully (Recharts connectNulls prop)
@@ -216,19 +216,19 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 
 ---
 
-### PR 4.3.4: Actionable Insights Panel
+### PR 4.3.4: Actionable Insights Panel ✅
 
 **Goal:** Display strengths, growth opportunities, and active alerts in organized panel
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/alert-card.tsx` for alert display
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/two-column-layout.tsx` for layout
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` lines 92-107 for exact section specs
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/alert-card.tsx` for alert display
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/two-column-layout.tsx` for layout
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/docs/project_overview.md` lines 92-107 for exact section specs
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Fetch insights data using getTutorInsights(tutorId)
   - Fetch alerts data using getTutorAlerts(tutorId, false)
   - Add Actionable Insights Panel section after Performance Trends
-- [ ] Implement panel with TwoColumnLayout or three-section layout:
+- [x] Implement panel with TwoColumnLayout or three-section layout:
   - **Strengths Section** (left or top):
     - Green header with CheckCircle icon and "Strengths" title
     - Bullet list of strengths from insights
@@ -248,11 +248,11 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
     - Show alert severity, title, triggered date
     - Include link to flagged session if session_id present
     - "Acknowledge" and "Resolve" button placeholders (handlers in future PR)
-- [ ] Handle empty states for each section:
+- [x] Handle empty states for each section:
   - Strengths: "Complete more sessions to identify strengths"
   - Growth: "No specific growth areas identified - keep up the great work!"
   - Alerts: Hide section entirely if no active alerts
-- [ ] Add visual separators between sections using border or Card components
+- [x] Add visual separators between sections using border or Card components
 
 **What to Test:**
 1. Build project - verify sections render correctly
@@ -273,23 +273,23 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 
 ---
 
-### PR 4.3.5: Session History Table
+### PR 4.3.5: Session History Table ✅
 
 **Goal:** Create comprehensive, sortable, filterable table of all tutor sessions
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/data-table.tsx` for table component
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/filter-bar.tsx` for filtering
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/session-card.tsx` for mobile view
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/services/session-service.ts` for getSessionsByTutorId
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/data-table.tsx` for table component
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/filter-bar.tsx` for filtering
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/session-card.tsx` for mobile view
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/services/session-service.ts` for getSessionsByTutorId
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Fetch session history using getSessionsByTutorId(tutorId)
   - Add Session History section after Actionable Insights Panel
-- [ ] Create client component NEW: `/Users/mike/gauntlet/tutor-dashboard/components/tutors/session-history-table.tsx`:
+- [x] Create client component NEW: `/Users/mike/gauntlet/tutor-dashboard/components/tutors/session-history-table.tsx`:
   - Client component for interactivity (sorting, filtering, pagination)
   - Receives sessions data as props from server component
   - Use DataTable component from Phase 3
-- [ ] Define table columns:
+- [x] Define table columns:
   - Date/Time: formatted with date-fns (e.g., "Nov 7, 2:00 PM")
   - Subject: subject name from join
   - Student: anonymized ID or student number
@@ -298,24 +298,24 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
   - Engagement: numeric score with color coding
   - Student Rating: star display if feedback exists, "N/A" if no feedback
   - Status: badge for status (completed, cancelled, no-show, etc.)
-- [ ] Implement FilterBar above table with:
+- [x] Implement FilterBar above table with:
   - Subject filter: dropdown of all subjects tutor teaches
   - Date range filter: presets (7d, 30d, 90d, all time)
   - Status filter: dropdown (all, completed only, flagged only)
   - Student filter: search/select student ID (if many students)
   - "Reset Filters" button
-- [ ] Implement sorting:
+- [x] Implement sorting:
   - Default: most recent first (scheduled_start DESC)
   - Sortable columns: Date, Score, Engagement, Rating
   - Use DataTable's built-in sort handling
-- [ ] Add row click handler:
+- [x] Add row click handler:
   - Navigate to `/sessions/[sessionId]` when row clicked
   - Use Next.js router.push for client-side navigation
-- [ ] Implement pagination if > 50 sessions:
+- [x] Implement pagination if > 50 sessions:
   - Show 25 sessions per page
   - Pagination controls at bottom
   - Update URL params for pagination state
-- [ ] Mobile responsive design:
+- [x] Mobile responsive design:
   - Desktop: full DataTable
   - Mobile: switch to SessionCard grid view (stack vertically)
   - Use Tailwind responsive classes: `hidden md:block` and `block md:hidden`
@@ -343,39 +343,39 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 
 ---
 
-### PR 4.3.6: Coaching Notes Section
+### PR 4.3.6: Coaching Notes Section ✅
 
 **Goal:** Display timestamped log of coaching interventions and system-generated insights
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/tutors.ts` to check if coaching_notes table exists
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/docs/database_schema.md` for notes schema (if exists)
-- [ ] If coaching_notes table doesn't exist, create migration:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/tutors.ts` to check if coaching_notes table exists
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/docs/database_schema.md` for notes schema (if exists)
+- [x] If coaching_notes table doesn't exist, create migration:
   - Table: coaching_notes
   - Columns: id (UUID PK), tutor_id (FK), note_type (enum: 'manual', 'system'), content (TEXT), created_by (user_id FK nullable), created_at (TIMESTAMP)
   - Note types: 'manual' for admin-entered notes, 'system' for auto-generated insights
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/tutor-service.ts`:
   - Add `getCoachingNotes(tutorId: string)` function
   - Returns array of notes ordered by created_at DESC
   - Join with users table to get admin name for manual notes
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Fetch coaching notes using getCoachingNotes(tutorId)
   - Add Coaching Notes section at bottom of page
-- [ ] Implement section with SectionContainer:
+- [x] Implement section with SectionContainer:
   - Title: "Coaching Notes & Intervention Log"
   - Description: "Track coaching conversations and system-generated insights"
   - Action button: "Add Note" (placeholder, handler in future)
-- [ ] Render notes as timeline:
+- [x] Render notes as timeline:
   - Each note card with: timestamp, author (admin name or "System"), content
   - Visual timeline connector (vertical line with dots)
   - System notes styled differently (muted background) than manual notes
   - Most recent at top
-- [ ] Add placeholder for "Add Note" functionality:
+- [x] Add placeholder for "Add Note" functionality:
   - Button opens dialog (Dialog component from Phase 3)
   - Form with textarea for note content
   - Submit button (handler placeholder - will use Server Action in Phase 5)
   - Cancel button to close dialog
-- [ ] Handle empty state:
+- [x] Handle empty state:
   - If no notes, show message: "No coaching notes yet. Add the first note to track interventions."
   - EmptyState component with FileText icon
 
@@ -402,34 +402,34 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 
 ---
 
-### PR 4.3.7: Navigation & Integration
+### PR 4.3.7: Navigation & Integration ✅
 
 **Goal:** Add navigation to tutor detail page from other pages and implement breadcrumbs
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` to understand dashboard structure
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/page-header.tsx` for breadcrumb support
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` to understand dashboard structure
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/page-header.tsx` for breadcrumb support
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Add breadcrumb navigation to PageHeader:
     - Home → Tutors → [Tutor Name]
     - Links: "/" → "/tutors" → current page
   - Add "Back to Tutors" button in page actions area
-- [ ] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/page.tsx` (tutors list page):
+- [x] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/page.tsx` (tutors list page):
   - Simple list/grid of all tutors with ScoreBadge and basic stats
   - Click tutor card to navigate to `/tutors/[id]`
   - Use StatGrid component for layout
   - This is simplified version - full implementation in Phase 4.2
-- [ ] Update dashboard to include link to tutors:
+- [x] Update dashboard to include link to tutors:
   - In header navigation or sidebar (if exists)
   - Or in dashboard cards with "View All Tutors" link
-- [ ] Add "View Sessions" quick link in tutor detail header:
+- [x] Add "View Sessions" quick link in tutor detail header:
   - Links to `/sessions?tutor=[tutorId]` (filtered sessions list)
   - Sessions list page simplified placeholder for now
-- [ ] Add back/forward navigation support:
+- [x] Add back/forward navigation support:
   - Use Next.js Link component for all navigation
   - Ensure browser back button works correctly
   - Use TanStack Query for client-side caching (optional enhancement)
-- [ ] Test navigation flow:
+- [x] Test navigation flow:
   - Dashboard → Tutors List → Tutor Detail
   - Tutor Detail → Session (click session row) → Back to Tutor Detail
   - Breadcrumb navigation at each step
@@ -457,44 +457,44 @@ This phase creates the full tutor detail page with all 5 sections and interactiv
 
 ---
 
-### PR 4.3.8: Polish & Error Handling
+### PR 4.3.8: Polish & Error Handling ✅
 
 **Goal:** Add loading states, error boundaries, and final polish
 
 **Tasks:**
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/loading-card.tsx` for loading states
-- [ ] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` for error handling patterns
-- [ ] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/loading.tsx`:
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/components/ui/loading-card.tsx` for loading states
+- [x] Read `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/page.tsx` for error handling patterns
+- [x] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/loading.tsx`:
   - Next.js 15 loading UI file (automatic loading state)
   - Show skeleton for: header, stats grid, chart, insights panel, table
   - Use LoadingCard components with appropriate variants
   - Match layout of actual page for smooth transition
-- [ ] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/error.tsx`:
+- [x] Create `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/error.tsx`:
   - Next.js 15 error boundary UI
   - Display user-friendly error message
   - "Retry" button to reload page
   - "Back to Tutors" button for navigation
   - Log error to console for debugging
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/app/tutors/[id]/page.tsx`:
   - Add null checks for tutor not found
   - If tutor doesn't exist, show EmptyState with 404 message
   - Handle service errors gracefully with try/catch
   - Add Suspense boundaries around heavy sections (chart, table)
-- [ ] Add metadata to page.tsx:
+- [x] Add metadata to page.tsx:
   - Dynamic metadata with tutor name in title
   - Example: `export async function generateMetadata({ params })`
   - Title: "Tutor Name - Performance Analysis | TutorReview"
   - Description: tutor bio snippet or default description
-- [ ] Performance optimizations:
+- [x] Performance optimizations:
   - Ensure service functions are cached appropriately
   - Use React.cache() for service calls if multiple components need same data
   - Minimize client-side JavaScript (keep most components as Server Components)
-- [ ] Accessibility improvements:
+- [x] Accessibility improvements:
   - Proper heading hierarchy (h1 for tutor name, h2 for sections)
   - ARIA labels for interactive elements
   - Keyboard navigation for table and filters
   - Color contrast checks for all badges and alerts
-- [ ] Final visual polish:
+- [x] Final visual polish:
   - Consistent spacing between sections (use Tailwind space-y classes)
   - Responsive design review (mobile, tablet, desktop)
   - Loading states smooth transitions

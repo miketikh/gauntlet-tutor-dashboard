@@ -70,13 +70,13 @@ This phase creates the backend service functions for churn risk calculation, wei
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/index.ts`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
-- [ ] Implement `getCurrentAlgorithmWeights()`:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
+- [x] Implement `getCurrentAlgorithmWeights()`:
   - Query `churn_algorithm_weights` table for latest version
   - Group by version, get highest version number
   - Return object mapping factor_category to weight
   - Return all 6 factors with default weights if no records exist
-- [ ] Implement `calculateStudentChurnRisk(studentId: string, weights?)`:
+- [x] Implement `calculateStudentChurnRisk(studentId: string, weights?)`:
   - Fetch student's session history with metrics
   - Calculate each of the 6 factors from session data:
     - first_session_satisfaction: first session overall_score / 10
@@ -88,16 +88,16 @@ This phase creates the backend service functions for churn risk calculation, wei
   - Apply weights to normalized factors
   - Sum weighted contributions to get churn_risk_score (0-1)
   - Return ChurnRiskResult interface with score, level (low/medium/high), and factor breakdown
-- [ ] Implement `calculateChurnFactors(studentId: string, weights)`:
+- [x] Implement `calculateChurnFactors(studentId: string, weights)`:
   - Helper function that returns array of ChurnFactor objects
   - Each factor includes: category, weight, value, normalized_score, impact, contribution_to_risk
   - Used for detailed risk panel display
-- [ ] Implement `validateWeights(weights: Record<string, number>)`:
+- [x] Implement `validateWeights(weights: Record<string, number>)`:
   - Check all 6 required factors are present
   - Verify each weight is between 0 and 1
   - Verify sum equals 1.0 (with 0.001 tolerance for floating point)
   - Return validation result with error messages
-- [ ] Define TypeScript interfaces:
+- [x] Define TypeScript interfaces:
   - `AlgorithmWeights` - map of factor to weight value
   - `ChurnRiskResult` - score, level, factors array
   - `WeightValidationResult` - isValid boolean and errors array
@@ -129,8 +129,8 @@ This phase creates the backend service functions for churn risk calculation, wei
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/alerts.ts`
 
 **Tasks:**
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
-- [ ] Implement `updateAlgorithmWeights(newWeights, changedBy, changeReason, caseStudy?)`:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
+- [x] Implement `updateAlgorithmWeights(newWeights, changedBy, changeReason, caseStudy?)`:
   - Validate weights using validateWeights()
   - Get current weights for old_weights field
   - Calculate accuracy_before using retroactive analysis
@@ -140,22 +140,22 @@ This phase creates the backend service functions for churn risk calculation, wei
   - Calculate accuracy_after with new weights
   - Update history record with accuracy metrics
   - Return WeightUpdateResult with version number and accuracy delta
-- [ ] Implement `getWeightHistory(limit = 10)`:
+- [x] Implement `getWeightHistory(limit = 10)`:
   - Query churn_weight_history ordered by created_at DESC
   - Include admin user name who made change
   - Parse old_weights and new_weights JSONB
   - Return array of WeightHistoryEntry objects
-- [ ] Implement `getWeightHistoryById(historyId: string)`:
+- [x] Implement `getWeightHistoryById(historyId: string)`:
   - Fetch single history record with full details
   - Include case study session/student info if linked
   - Return detailed WeightHistoryDetail object
-- [ ] Implement `calculateRetroactiveAccuracy(weights)`:
+- [x] Implement `calculateRetroactiveAccuracy(weights)`:
   - Get all students with known churn status (churned or active > 90 days)
   - Calculate predicted risk for each using provided weights
   - Compare prediction to actual outcome (threshold: >0.6 = predicted churn)
   - Count true positives, false positives, true negatives, false negatives
   - Return accuracy metrics object
-- [ ] Define TypeScript interfaces:
+- [x] Define TypeScript interfaces:
   - `WeightUpdateResult` - version, accuracyBefore, accuracyAfter, delta
   - `WeightHistoryEntry` - summary view for list
   - `WeightHistoryDetail` - full view with case study
@@ -189,31 +189,31 @@ This phase creates the backend service functions for churn risk calculation, wei
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/schema/students.ts`
 
 **Tasks:**
-- [ ] Update `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
-- [ ] Implement `getLearningEvents(limit = 20)`:
+- [x] Update `/Users/mike/gauntlet/tutor-dashboard/services/churn-service.ts`
+- [x] Implement `getLearningEvents(limit = 20)`:
   - Query churn_weight_history with student/session joins
   - Filter to entries with case_study_student_id (actual learning cases)
   - Include student churn survey response
   - Calculate predicted vs actual outcome
   - Order by created_at DESC
   - Return array of LearningEvent objects
-- [ ] Implement `createCaseStudy(studentId, predictedRisk, actualOutcome, surveyResponse?)`:
+- [x] Implement `createCaseStudy(studentId, predictedRisk, actualOutcome, surveyResponse?)`:
   - Fetch student data and calculate what system predicted
   - Analyze prediction accuracy (was it correct?)
   - Generate AI-recommended weight adjustments based on which factors were wrong
   - Return CaseStudyRecommendation object with suggested weight changes
-- [ ] Implement `applyCaseStudy(caseStudyId, acceptedWeights, adminId)`:
+- [x] Implement `applyCaseStudy(caseStudyId, acceptedWeights, adminId)`:
   - Validate and apply weight changes from case study
   - Link weight history to the case study student/session
   - Mark case study as applied
-  - Return success result
-- [ ] Implement `getRecentChurns(limit = 10)`:
+  - Return success result (Note: implemented via applyCaseStudyWeights server action)
+- [x] Implement `getRecentChurns(limit = 10)`:
   - Query students table where status = 'churned'
   - Include churn date, reasons, survey response
   - Calculate what the system predicted vs reality
   - Order by churned_date DESC
   - Return array of ChurnedStudent objects for case study workflow
-- [ ] Define TypeScript interfaces:
+- [x] Define TypeScript interfaces:
   - `LearningEvent` - what system learned from a churn case
   - `CaseStudyRecommendation` - suggested weight adjustments with rationale
   - `ChurnedStudent` - student info with prediction comparison
@@ -252,9 +252,9 @@ This phase builds the reusable UI components for the algorithm dashboard.
 - `/Users/mike/gauntlet/tutor-dashboard/lib/db/types.ts` (ChurnFactorCategory)
 
 **Tasks:**
-- [ ] Install shadcn slider if not present: `npx shadcn@latest add slider`
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/weight-slider.tsx`
-- [ ] Build WeightSlider component:
+- [x] Install shadcn slider if not present: `npx shadcn@latest add slider`
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/weight-slider.tsx`
+- [x] Build WeightSlider component:
   - Props: factor (category), weight (0-1), suggestedWeight?, onChange, disabled
   - Display factor name in readable format (e.g., "First Session Satisfaction")
   - Show current weight as percentage (0-100%)
@@ -263,8 +263,8 @@ This phase builds the reusable UI components for the algorithm dashboard.
   - Live percentage display next to slider
   - Impact indicator badge (Low/Medium/High/Very High based on weight value)
   - Tooltip explaining what this factor measures
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/weight-panel.tsx`
-- [ ] Build WeightPanel component:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/weight-panel.tsx`
+- [x] Build WeightPanel component:
   - Props: weights (Record<string, number>), onWeightsChange, suggestedWeights?, disabled
   - Render WeightSlider for each of 6 factors
   - Calculate and display total weight sum at bottom
@@ -273,7 +273,7 @@ This phase builds the reusable UI components for the algorithm dashboard.
   - Action buttons: "Apply Suggested", "Reset to Defaults", "Save Changes"
   - Disable save button if validation fails
   - Display delta from current weights (e.g., "+5% First Session, -3% Tutor Consistency")
-- [ ] Define TypeScript interfaces for component props
+- [x] Define TypeScript interfaces for component props
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -304,8 +304,8 @@ This phase builds the reusable UI components for the algorithm dashboard.
 - `/Users/mike/gauntlet/tutor-dashboard/components/ui/badge.tsx`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/performance-summary.tsx`
-- [ ] Build PerformanceSummary component:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/performance-summary.tsx`
+- [x] Build PerformanceSummary component:
   - Props: accuracyMetrics (AccuracyMetrics from service)
   - Display in card layout with title "Model Performance Summary"
   - Show large percentage for current accuracy (e.g., "73.5% Accurate")
@@ -351,8 +351,8 @@ This phase builds the reusable UI components for the algorithm dashboard.
 - `/Users/mike/gauntlet/tutor-dashboard/components/ui/badge.tsx`
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/learning-event-card.tsx`
-- [ ] Build LearningEventCard component:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/learning-event-card.tsx`
+- [x] Build LearningEventCard component:
   - Props: event (LearningEvent object)
   - Show date and time of event
   - Display student ID (anonymized, e.g., "Student #1247")
@@ -361,15 +361,15 @@ This phase builds the reusable UI components for the algorithm dashboard.
   - Show survey response excerpt if available (truncated to 100 chars)
   - Badge showing if prediction was correct/incorrect
   - Link to "View Full Case Study" (opens detail modal)
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/learning-events-feed.tsx`
-- [ ] Build LearningEventsFeed component:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/learning-events-feed.tsx`
+- [x] Build LearningEventsFeed component:
   - Props: events (array of LearningEvent), maxEvents?
   - Display events in reverse chronological order
   - Each event uses LearningEventCard
   - Show "Load More" button if more events exist
   - Empty state: "No learning events yet" with friendly message
   - Filter dropdown: All / Correct Predictions / Incorrect Predictions / Has Survey
-- [ ] Style as scrollable feed with max height
+- [x] Style as scrollable feed with max height
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -399,9 +399,9 @@ This phase builds the reusable UI components for the algorithm dashboard.
 - `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/weight-panel.tsx` (from PR 2.1)
 
 **Tasks:**
-- [ ] Install shadcn dialog if not present: `npx shadcn@latest add dialog`
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/case-study-modal.tsx`
-- [ ] Build CaseStudyModal component:
+- [x] Install shadcn dialog if not present: `npx shadcn@latest add dialog`
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/case-study-modal.tsx`
+- [x] Build CaseStudyModal component:
   - Props: studentId, predictedRisk, actualOutcome, surveyResponse?, onClose, onApply
   - Modal dialog with max-width and scrolling
   - Section 1: "What Happened"
@@ -423,7 +423,7 @@ This phase builds the reusable UI components for the algorithm dashboard.
     - Show how many students' predictions would improve with new weights
     - Display accuracy delta (e.g., "73.5% → 76.2%")
   - Action buttons: "Apply Changes", "Modify Weights", "Dismiss Case"
-- [ ] Add loading states and error handling
+- [x] Add loading states and error handling
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -453,9 +453,9 @@ This phase builds the reusable UI components for the algorithm dashboard.
 - `/Users/mike/gauntlet/tutor-dashboard/components/ui/table.tsx` (if exists, otherwise use shadcn)
 
 **Tasks:**
-- [ ] Install shadcn table if not present: `npx shadcn@latest add table`
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/before-after-modal.tsx`
-- [ ] Build BeforeAfterModal component:
+- [x] Install shadcn table if not present: `npx shadcn@latest add table`
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/components/algorithm/before-after-modal.tsx`
+- [x] Build BeforeAfterModal component:
   - Props: oldWeights, newWeights, comparisonResults, onClose, onConfirm
   - Modal dialog with large width for table
   - Section 1: "Weight Changes Summary"
@@ -476,7 +476,7 @@ This phase builds the reusable UI components for the algorithm dashboard.
     - Count of students with improved predictions
     - Recommendation: Apply / Needs More Analysis
   - Action buttons: "Confirm & Apply", "Cancel"
-- [ ] Add visual indicators for improvements vs regressions
+- [x] Add visual indicators for improvements vs regressions
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -512,32 +512,34 @@ This phase assembles all components into the main Algorithm Refinement Dashboard
 - All components from Phase 2 (PR 2.1-2.5)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/algorithm/page.tsx`
-- [ ] Build Algorithm Dashboard page structure:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/algorithm/page.tsx`
+- [x] Build Algorithm Dashboard page structure:
   - Page header with title "Algorithm Refinement Dashboard"
   - Subtitle explaining purpose: "Monitor and improve churn prediction accuracy"
   - Last updated timestamp
   - 5 main sections in responsive grid layout
-- [ ] Section 1: Model Performance Summary (top, full width)
+- [x] Section 1: Model Performance Summary (top, full width)
   - Use PerformanceSummary component
   - Fetch data via Server Component from churn-service
-- [ ] Section 2: Churn Prediction Factors & Weights (left column)
+- [x] Section 2: Churn Prediction Factors & Weights (left column)
   - Use WeightPanel component
   - Load current weights from service
-  - Handle weight updates via Server Action
-  - Show success toast on save
-- [ ] Section 3: Recent Learning Events (right column)
+  - Handle weight updates via Server Action (to be wired up)
+  - Show success toast on save (to be implemented)
+- [x] Section 3: Recent Learning Events (right column)
   - Use LearningEventsFeed component
   - Fetch last 20 learning events
   - Scrollable container with max height
-- [ ] Section 4: Quick Actions panel (below main sections)
-  - Button: "Analyze Recent Churns" - opens case study workflow
-  - Button: "View Full History" - links to weight history page
+- [x] Section 4: Quick Actions panel (below main sections)
+  - Button: "Analyze Recent Churns" - opens case study workflow (placeholder for now)
+  - Button: "View Full History" - links to weight history page (future)
   - Button: "Export Model Report" - downloads summary (future feature)
-- [ ] Implement responsive layout:
+- [x] Implement responsive layout:
   - Desktop: 2-column grid for sections 2 & 3
   - Tablet: Stacked sections with full width
   - Mobile: Single column, sections collapse
+- [x] Create loading.tsx for route
+- [x] Create error.tsx for error boundary
 
 **What to Test:**
 1. Build project - verify no compilation errors
@@ -568,8 +570,8 @@ This phase assembles all components into the main Algorithm Refinement Dashboard
 - `/Users/mike/gauntlet/tutor-dashboard/lib/supabase/server.ts` (for auth)
 
 **Tasks:**
-- [ ] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/algorithm/actions.ts`
-- [ ] Implement `updateWeights` server action:
+- [x] Create NEW: `/Users/mike/gauntlet/tutor-dashboard/app/dashboard/algorithm/actions.ts`
+- [x] Implement `updateWeights` server action:
   - Mark with 'use server' directive
   - Accept: newWeights (Record<string, number>), changeReason (string)
   - Validate user is authenticated admin via Supabase
@@ -578,22 +580,22 @@ This phase assembles all components into the main Algorithm Refinement Dashboard
   - Call updateAlgorithmWeights() from churn-service
   - Return success with new version number and accuracy metrics
   - Use proper error handling and return types
-- [ ] Implement `simulateWeightChange` server action:
+- [x] Implement `simulateWeightChange` server action:
   - Accept: proposedWeights (Record<string, number>)
   - Calculate retroactive accuracy without saving
   - Return AccuracyMetrics and affected students list
   - Used for "Preview Impact" feature before saving
-- [ ] Implement `createChurnCaseStudy` server action:
+- [x] Implement `createChurnCaseStudy` server action:
   - Accept: studentId, surveyResponse (optional)
   - Fetch student data and calculate predicted vs actual
   - Call createCaseStudy() from churn-service
   - Return CaseStudyRecommendation
-- [ ] Implement `applyCaseStudyWeights` server action:
+- [x] Implement `applyCaseStudyWeights` server action:
   - Accept: caseStudyId, acceptedWeights
   - Validate and apply weights
   - Link to case study in history
   - Return success result
-- [ ] Add TypeScript return types for all actions using FormState pattern
+- [x] Add TypeScript return types for all actions using ActionResult pattern
 
 **What to Test:**
 1. Build project - verify no TypeScript errors
