@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export async function TutorsNeedingAttention() {
-  const tutors = await getTutorsNeedingAttention(5);
+  const tutors = await getTutorsNeedingAttention(3);
 
   if (tutors.length === 0) {
     return (
@@ -44,6 +44,9 @@ export async function TutorsNeedingAttention() {
                   <p className="font-medium text-foreground truncate">
                     {tutor.name}
                   </p>
+                  {(tutor.churn_risk_level === 'medium' || tutor.churn_risk_level === 'high') && (
+                    <span className="text-sm shrink-0" title={`${tutor.churn_risk_level} churn risk`}>⚠️</span>
+                  )}
                   {isCritical && (
                     <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
                   )}

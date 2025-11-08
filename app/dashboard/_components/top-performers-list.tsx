@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export async function TopPerformersList() {
-  const performers = await getDashboardTopPerformers(10);
+  const performers = await getDashboardTopPerformers(3);
 
   if (performers.length === 0) {
     return (

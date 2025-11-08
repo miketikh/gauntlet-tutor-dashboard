@@ -1,15 +1,20 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { getAllTutors, getTutorOverallScore } from "@/services/tutor-service"
+import { getAllTutorsWithMetrics } from "@/services/tutor-service"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScoreBadge } from "@/components/ui/score-badge"
 import { Badge } from "@/components/ui/badge"
-import { User, Calendar } from "lucide-react"
+import { User, Calendar, X, AlertTriangle } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
-export default async function TutorsListPage() {
+type TutorsPageProps = {
+  searchParams: Promise<{ churnRisk?: string }>
+}
+
+export default async function TutorsListPage({ searchParams }: TutorsPageProps) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -18,22 +23,18 @@ export default async function TutorsListPage() {
     redirect("/auth/sign-in")
   }
 
-  // Fetch all tutors
-  const tutors = await getAllTutors()
+  // Parse query params
+  const params = await searchParams
+  const churnRiskParam = params.churnRisk
+  const churnRiskFilter = churnRiskParam ? churnRiskParam.split(',') : undefined
 
-  // Fetch overall scores for each tutor (in parallel)
-  const tutorsWithScores = await Promise.all(
-    tutors.map(async (tutor) => {
-      const overallScore = await getTutorOverallScore(tutor.user_id)
-      return {
-        ...tutor,
-        overall_score: overallScore,
-      }
-    })
-  )
+  // Fetch all tutors with metrics in single efficient query
+  const tutorsWithMetrics = await getAllTutorsWithMetrics({
+    churnRisk: churnRiskFilter
+  })
 
   // Sort by score descending (highest first)
-  const sortedTutors = tutorsWithScores.sort((a, b) => {
+  const sortedTutors = tutorsWithMetrics.sort((a, b) => {
     if (a.overall_score === null) return 1
     if (b.overall_score === null) return -1
     return b.overall_score - a.overall_score
@@ -46,12 +47,23 @@ export default async function TutorsListPage() {
         <div className="container mx-auto px-4 py-4 md:px-6">
           <PageHeader
             title="Tutors"
-            description={`${tutors.length} tutors in the system`}
+            description={`${sortedTutors.length} tutors${churnRiskFilter ? ' (filtered)' : ''}`}
             breadcrumbs={[
               { label: "Dashboard", href: "/dashboard" },
               { label: "Tutors" },
             ]}
           />
+          {churnRiskFilter && (
+            <div className="mt-4 flex items-center gap-2">
+              <Badge variant="outline" className="gap-2">
+                <AlertTriangle className="h-3 w-3" />
+                Churn Risk: {churnRiskFilter.join(', ')}
+                <Link href="/tutors">
+                  <X className="h-3 w-3 cursor-pointer hover:text-destructive" />
+                </Link>
+              </Badge>
+            </div>
+          )}
         </div>
       </header>
 
@@ -68,7 +80,12 @@ export default async function TutorsListPage() {
                         <User className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{tutor.name}</CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {tutor.name}
+                          {(tutor.churn_risk_level === 'medium' || tutor.churn_risk_level === 'high') && (
+                            <span className="text-base" title={`${tutor.churn_risk_level} churn risk`}>⚠️</span>
+                          )}
+                        </CardTitle>
                         <p className="text-xs text-muted-foreground">{tutor.email}</p>
                       </div>
                     </div>
@@ -106,7 +123,7 @@ export default async function TutorsListPage() {
         </div>
 
         {/* Empty State */}
-        {tutors.length === 0 && (
+        {sortedTutors.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <User className="h-8 w-8 text-muted-foreground" />

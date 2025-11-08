@@ -42,6 +42,20 @@ export interface TutorFilters {
   subject_id?: string;
 }
 
+export interface TutorWithMetrics {
+  user_id: string;
+  name: string;
+  email: string;
+  member_since: string;
+  bio: string | null;
+  hourly_rate: string | null;
+  overall_score: number | null;
+  total_sessions: number;
+  churn_risk_level: 'low' | 'medium' | 'high';
+  no_show_count_30d: number;
+  reschedule_count_30d: number;
+}
+
 export interface TutorDetailData {
   // User info
   user_id: string;
@@ -281,6 +295,99 @@ export async function getAllTutors(options?: TutorFilters): Promise<TutorSummary
   } catch (error) {
     console.error('Error in getAllTutors:', error);
     throw new Error('Failed to fetch tutors: ' + (error as Error).message);
+  }
+}
+
+/**
+ * Get all tutors with calculated metrics in a single efficient query
+ *
+ * This function uses GROUP BY aggregations to calculate scores, session counts,
+ * and churn risk indicators in one database query instead of N+1 queries.
+ *
+ * @param filters - Optional filters including churn risk levels to filter by
+ * @returns Array of tutors with all metrics calculated
+ *
+ * @example
+ * ```typescript
+ * // Get all tutors with metrics
+ * const tutors = await getAllTutorsWithMetrics();
+ *
+ * // Get only high and medium churn risk tutors
+ * const atRiskTutors = await getAllTutorsWithMetrics({
+ *   churnRisk: ['high', 'medium']
+ * });
+ * ```
+ */
+export async function getAllTutorsWithMetrics(filters?: {
+  churnRisk?: string[]
+}): Promise<TutorWithMetrics[]> {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Single efficient query with GROUP BY aggregations
+    const results = await db
+      .select({
+        user_id: tutors.user_id,
+        name: users.name,
+        email: users.email,
+        member_since: tutors.member_since,
+        bio: tutors.bio,
+        hourly_rate: tutors.hourly_rate,
+        // Aggregate session metrics
+        avg_score: avg(sessions.overall_session_score),
+        total_sessions: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'completed' THEN ${sessions.id} END)`,
+        // Churn risk indicators (last 30 days)
+        no_show_count_30d: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'no_show_tutor' AND ${sessions.scheduled_start} >= ${thirtyDaysAgo.toISOString()} THEN ${sessions.id} END)`,
+        reschedule_count_30d: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'rescheduled' AND ${sessions.rescheduled_by} = 'tutor' AND ${sessions.scheduled_start} >= ${thirtyDaysAgo.toISOString()} THEN ${sessions.id} END)`,
+      })
+      .from(tutors)
+      .innerJoin(users, eq(tutors.user_id, users.id))
+      .leftJoin(sessions, eq(tutors.user_id, sessions.tutor_id))
+      .groupBy(tutors.user_id, users.name, users.email, tutors.member_since, tutors.bio, tutors.hourly_rate)
+      .orderBy(desc(tutors.member_since));
+
+    // Calculate churn risk level and format results
+    const tutorsWithMetrics: TutorWithMetrics[] = results.map((result) => {
+      const noShows = Number(result.no_show_count_30d || 0);
+      const reschedules = Number(result.reschedule_count_30d || 0);
+
+      // Determine churn risk level based on thresholds
+      let churnRiskLevel: 'low' | 'medium' | 'high';
+      if (noShows >= 2 || reschedules >= 4) {
+        churnRiskLevel = 'high';
+      } else if (noShows === 1 || reschedules >= 2) {
+        churnRiskLevel = 'medium';
+      } else {
+        churnRiskLevel = 'low';
+      }
+
+      return {
+        user_id: result.user_id,
+        name: result.name,
+        email: result.email,
+        member_since: result.member_since,
+        bio: result.bio,
+        hourly_rate: result.hourly_rate,
+        overall_score: result.avg_score ? Number(result.avg_score) : null,
+        total_sessions: Number(result.total_sessions || 0),
+        churn_risk_level: churnRiskLevel,
+        no_show_count_30d: noShows,
+        reschedule_count_30d: reschedules,
+      };
+    });
+
+    // Apply churn risk filter if specified
+    if (filters?.churnRisk && filters.churnRisk.length > 0) {
+      return tutorsWithMetrics.filter((tutor) =>
+        filters.churnRisk!.includes(tutor.churn_risk_level)
+      );
+    }
+
+    return tutorsWithMetrics;
+  } catch (error) {
+    console.error('Error in getAllTutorsWithMetrics:', error);
+    throw new Error('Failed to fetch tutors with metrics: ' + (error as Error).message);
   }
 }
 

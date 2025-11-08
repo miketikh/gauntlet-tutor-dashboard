@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, LogOut, Users, GraduationCap, FileText, Settings } from 'lucide-react';
+import { BarChart3, LogOut, Users, GraduationCap, FileText, Settings, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +20,7 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
     { href: '/students', label: 'Students', icon: Users },
     { href: '/dashboard/sessions', label: 'Sessions', icon: FileText },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+    { href: '/dashboard/generate', label: 'Generate', icon: Database },
   ];
 
   return (
@@ -38,7 +39,9 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+              const isActive = link.href === '/dashboard'
+                ? pathname === '/dashboard'
+                : pathname === link.href || pathname.startsWith(link.href + '/');
 
               return (
                 <Link
@@ -76,7 +79,9 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
         <div className="flex items-center gap-1 overflow-x-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+            const isActive = link.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : pathname === link.href || pathname.startsWith(link.href + '/');
 
             return (
               <Link

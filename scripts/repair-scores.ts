@@ -83,13 +83,13 @@ async function repairScores() {
         // Convert database metrics to generator format
         const audioMetrics = {
           sessionId: session.id,
-          tutorTalkRatio: parseFloat(audioMetricsData.tutor_talk_ratio),
-          studentTalkRatio: parseFloat(audioMetricsData.student_talk_ratio),
-          productiveSilenceRatio: parseFloat(audioMetricsData.productive_silence_ratio),
-          awkwardPauseRatio: parseFloat(audioMetricsData.awkward_pause_ratio),
-          studentEngagementScore: parseFloat(audioMetricsData.student_engagement_score),
-          tutorEnthusiasmScore: parseFloat(audioMetricsData.tutor_enthusiasm_score),
-          avgStudentResponseDelay: parseFloat(audioMetricsData.avg_student_response_delay),
+          tutorTalkRatio: parseFloat(audioMetricsData.tutor_talk_ratio || '0'),
+          studentTalkRatio: parseFloat(audioMetricsData.student_talk_ratio || '0'),
+          productiveSilenceRatio: parseFloat(audioMetricsData.productive_silence_ratio || '0'),
+          awkwardPauseRatio: parseFloat(audioMetricsData.awkward_pause_ratio || '0'),
+          studentEngagementScore: parseFloat(audioMetricsData.student_engagement_score || '0'),
+          tutorEnthusiasmScore: parseFloat(audioMetricsData.tutor_enthusiasm_score || '0'),
+          avgStudentResponseDelay: parseFloat(audioMetricsData.avg_student_response_delay || '0'),
           longPausesCount: audioMetricsData.long_pauses_count,
           studentInitiatedQuestions: audioMetricsData.student_initiated_questions,
           studentFrustrationCount: audioMetricsData.student_frustration_count,
@@ -105,8 +105,8 @@ async function repairScores() {
 
         const videoMetrics = videoMetricsData ? {
           sessionId: session.id,
-          studentOnScreenAttentionPct: parseFloat(videoMetricsData.student_on_screen_attention_pct),
-          studentVisualEngagementScore: parseFloat(videoMetricsData.student_visual_engagement_score),
+          studentOnScreenAttentionPct: parseFloat(videoMetricsData.student_on_screen_attention_pct || '0'),
+          studentVisualEngagementScore: parseFloat(videoMetricsData.student_visual_engagement_score || '0'),
           distractionEventsCount: videoMetricsData.distraction_events_count,
           confusionMomentsCount: videoMetricsData.confusion_moments_count,
           tutorUsesVisualAids: videoMetricsData.tutor_uses_visual_aids,
@@ -115,7 +115,7 @@ async function repairScores() {
 
         const screenMetrics = screenMetricsData ? {
           sessionId: session.id,
-          activeTabFocusPct: parseFloat(screenMetricsData.active_tab_focus_pct),
+          activeTabFocusPct: parseFloat(screenMetricsData.active_tab_focus_pct || '0'),
           tabSwitchesCount: screenMetricsData.tab_switches_count,
           whiteboardUsageMinutes: screenMetricsData.whiteboard_usage_minutes,
           messagingAppDetected: screenMetricsData.messaging_app_detected,

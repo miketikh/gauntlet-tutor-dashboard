@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { sessions, users, subjects, alerts, sessionAudioMetrics, sessionFeedback } from '@/lib/db';
-import { eq, desc, and, sql, gte, lte, count, avg, isNull } from 'drizzle-orm';
+import { eq, desc, and, sql, gte, lte, count, avg, isNull, inArray } from 'drizzle-orm';
 
 // ============================================
 // TypeScript Interfaces
@@ -28,6 +28,7 @@ export interface TutorNeedingAttention {
   name: string;
   overall_score: number;
   active_alert_count: number;
+  churn_risk_level: 'low' | 'medium' | 'high';
 }
 
 export interface RecentSession {
@@ -279,11 +280,11 @@ export async function getDashboardTopPerformers(limit: number = 10): Promise<Top
 }
 
 /**
- * Get tutors needing attention (with active alerts or low scores)
- * @param limit - Number of tutors to return (default: 5)
- * @returns Array of tutors with alerts and low scores
+ * Get tutors needing attention (bottom performers by score)
+ * @param limit - Number of tutors to return (default: 3)
+ * @returns Array of bottom performing tutors with scores and alert counts
  */
-export async function getTutorsNeedingAttention(limit: number = 5): Promise<TutorNeedingAttention[]> {
+export async function getTutorsNeedingAttention(limit: number = 3): Promise<TutorNeedingAttention[]> {
   if (limit <= 0) {
     throw new Error('Limit must be greater than 0');
   }
@@ -292,12 +293,14 @@ export async function getTutorsNeedingAttention(limit: number = 5): Promise<Tuto
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Get tutors with their average scores from last 30 days
+    // Get tutors with their average scores AND churn risk indicators from last 30 days
     const tutorScores = await db
       .select({
         user_id: sessions.tutor_id,
         name: users.name,
         overall_score: avg(sessions.overall_session_score),
+        no_show_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'no_show_tutor' THEN ${sessions.id} END)`,
+        reschedule_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'rescheduled' AND ${sessions.rescheduled_by} = 'tutor' THEN ${sessions.id} END)`,
       })
       .from(sessions)
       .innerJoin(users, eq(sessions.tutor_id, users.id))
@@ -307,20 +310,28 @@ export async function getTutorsNeedingAttention(limit: number = 5): Promise<Tuto
           eq(sessions.status, 'completed')
         )
       )
-      .groupBy(sessions.tutor_id, users.name);
+      .groupBy(sessions.tutor_id, users.name)
+      .orderBy(avg(sessions.overall_session_score)) // Ascending order - lowest scores first
+      .limit(limit);
 
-    // Get active alert counts for each tutor
+    // Get active alert counts for the bottom performers
+    const tutorIds = tutorScores.map(t => t.user_id);
+
+    if (tutorIds.length === 0) {
+      return [];
+    }
+
     const alertCounts = await db
       .select({
         tutor_id: alerts.tutor_id,
         alert_count: count(alerts.id),
-        has_critical: sql<number>`COUNT(CASE WHEN ${alerts.severity} = 'critical' THEN 1 END)`,
       })
       .from(alerts)
       .where(
         and(
           eq(alerts.acknowledged, false),
-          eq(alerts.resolved, false)
+          eq(alerts.resolved, false),
+          inArray(alerts.tutor_id, tutorIds)
         )
       )
       .groupBy(alerts.tutor_id);
@@ -329,49 +340,32 @@ export async function getTutorsNeedingAttention(limit: number = 5): Promise<Tuto
     const alertMap = new Map(
       alertCounts.map((a) => [
         a.tutor_id,
-        {
-          count: Number(a.alert_count ?? 0),
-          hasCritical: Number(a.has_critical ?? 0) > 0,
-        },
+        Number(a.alert_count ?? 0),
       ])
     );
 
-    // Combine scores and alerts, filter for tutors needing attention
-    const tutorsNeedingAttention = tutorScores
-      .map((t) => {
-        const alertInfo = alertMap.get(t.user_id) || { count: 0, hasCritical: false };
-        const score = Number(t.overall_score ?? 0);
+    return tutorScores.map((t) => {
+      const noShows = Number(t.no_show_count || 0);
+      const reschedules = Number(t.reschedule_count || 0);
 
-        return {
-          user_id: t.user_id,
-          name: t.name,
-          overall_score: score,
-          active_alert_count: alertInfo.count,
-          has_critical: alertInfo.hasCritical,
-        };
-      })
-      .filter((t) => t.active_alert_count > 0 || t.overall_score < 6.5)
-      .sort((a, b) => {
-        // Critical alerts first
-        if (a.has_critical && !b.has_critical) return -1;
-        if (!a.has_critical && b.has_critical) return 1;
+      // Calculate churn risk level
+      let churnRiskLevel: 'low' | 'medium' | 'high';
+      if (noShows >= 2 || reschedules >= 4) {
+        churnRiskLevel = 'high';
+      } else if (noShows === 1 || reschedules >= 2) {
+        churnRiskLevel = 'medium';
+      } else {
+        churnRiskLevel = 'low';
+      }
 
-        // Then by alert count
-        if (a.active_alert_count !== b.active_alert_count) {
-          return b.active_alert_count - a.active_alert_count;
-        }
-
-        // Finally by lowest score
-        return a.overall_score - b.overall_score;
-      })
-      .slice(0, limit);
-
-    return tutorsNeedingAttention.map((t) => ({
-      user_id: t.user_id,
-      name: t.name,
-      overall_score: t.overall_score,
-      active_alert_count: t.active_alert_count,
-    }));
+      return {
+        user_id: t.user_id,
+        name: t.name,
+        overall_score: Number(t.overall_score ?? 0),
+        active_alert_count: alertMap.get(t.user_id) || 0,
+        churn_risk_level: churnRiskLevel,
+      };
+    });
   } catch (error) {
     console.error('Error fetching tutors needing attention:', error);
     return [];
