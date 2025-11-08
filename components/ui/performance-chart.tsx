@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils"
 
 export interface PerformanceChartData {
   date: string
-  sessionScore?: number
-  engagement?: number
-  satisfaction?: number
+  sessionScore?: number | null | undefined
+  engagement?: number | null | undefined
+  satisfaction?: number | null | undefined
 }
 
 export interface PerformanceChartProps {
@@ -72,6 +72,12 @@ export function PerformanceChart({
               borderRadius: "var(--radius)",
             }}
             labelStyle={{ color: "hsl(var(--foreground))" }}
+            formatter={(value: any) => {
+              if (typeof value === 'number') {
+                return value.toFixed(2);
+              }
+              return value;
+            }}
           />
           <Legend
             wrapperStyle={{

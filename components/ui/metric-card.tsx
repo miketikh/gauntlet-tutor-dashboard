@@ -42,6 +42,7 @@ export interface MetricCardProps extends VariantProps<typeof metricCardVariants>
   trendValue?: string | number
   description?: string
   className?: string
+  children?: React.ReactNode
 }
 
 export function MetricCard({
@@ -53,6 +54,7 @@ export function MetricCard({
   description,
   variant = "default",
   className,
+  children,
 }: MetricCardProps) {
   return (
     <Card className={cn(metricCardVariants({ variant }), className)}>
@@ -86,6 +88,7 @@ export function MetricCard({
             )}
           </div>
         )}
+        {children}
       </CardContent>
     </Card>
   )
