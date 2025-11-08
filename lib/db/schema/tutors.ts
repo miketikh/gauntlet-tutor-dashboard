@@ -22,6 +22,9 @@ export const insightCategoryEnum = pgEnum('insight_category', [
   'first_session_expert',
 ]);
 
+// Coaching note type enum
+export const coachingNoteTypeEnum = pgEnum('coaching_note_type', ['manual', 'system']);
+
 // Tutors table
 export const tutors = pgTable('tutors', {
   user_id: varchar('user_id', { length: 128 }).primaryKey().references(() => users.id, { onDelete: 'cascade' }),
@@ -67,4 +70,14 @@ export const tutorInsights = pgTable('tutor_insights', {
   resolved_at: timestamp('resolved_at'),
   sample_sessions: uuid('sample_sessions').array(),
   metric_value: decimal('metric_value', { precision: 5, scale: 2 }),
+});
+
+// Coaching notes (intervention log)
+export const coachingNotes = pgTable('coaching_notes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tutor_id: varchar('tutor_id', { length: 128 }).notNull().references(() => users.id, { onDelete: 'cascade' }),
+  note_type: coachingNoteTypeEnum('note_type').notNull(),
+  content: text('content').notNull(),
+  created_by: varchar('created_by', { length: 128 }).references(() => users.id, { onDelete: 'set null' }),
+  created_at: timestamp('created_at').defaultNow().notNull(),
 });

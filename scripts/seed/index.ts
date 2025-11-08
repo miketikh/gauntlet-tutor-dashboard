@@ -2,6 +2,7 @@
 // Main seed data orchestrator
 
 import { drizzle } from 'drizzle-orm/postgres-js';
+import { eq } from 'drizzle-orm';
 import postgres from 'postgres';
 import { config } from 'dotenv';
 import { createSeededRandom } from './utils/random';
@@ -369,7 +370,7 @@ async function seed() {
             overall_session_score: overallScore.toString(),
             ai_summary: sessionFactory.generateAiSummary(sessionData, audioMetrics),
           })
-          .where({ id: insertedSession.id } as any);
+          .where(eq(sessions.id, insertedSession.id));
 
         // Generate feedback (60% chance)
         const feedback = feedbackGen.generateFeedback(
