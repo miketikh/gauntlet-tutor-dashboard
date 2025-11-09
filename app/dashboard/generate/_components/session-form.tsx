@@ -67,36 +67,220 @@ interface SessionPairing {
 
 type TemplateType = 'good' | 'poor' | 'no_show' | 'technical' | 'first_success';
 
-const SCENARIO_TEMPLATES = {
+interface TemplateMetrics {
+  audio: Partial<AudioMetricsData>;
+  video?: Partial<VideoMetricsData>;
+  screen?: Partial<ScreenMetricsData>;
+  feedback?: Partial<FeedbackData>;
+}
+
+interface ScenarioTemplate {
+  name: string;
+  description: string;
+  status: SessionStatus;
+  duration: ScheduledDuration;
+  metrics?: TemplateMetrics;
+}
+
+const SCENARIO_TEMPLATES: Record<TemplateType, ScenarioTemplate> = {
   good: {
     name: 'Good Session',
     description: 'High engagement, no issues, follow-up booked',
     status: 'completed' as SessionStatus,
     duration: 60 as ScheduledDuration,
+    metrics: {
+      audio: {
+        tutorTalkRatio: 0.38,
+        studentTalkRatio: 0.50,
+        productiveSilenceRatio: 0.10,
+        awkwardPauseRatio: 0.02,
+        studentEngagementScore: 8.5,
+        tutorEnthusiasmScore: 8.5,
+        studentInitiatedQuestions: 8,
+        tutorChecksUnderstandingCount: 12,
+        tutorPositiveReinforcementCount: 10,
+        avgStudentResponseDelay: 2.0,
+        longPausesCount: 1,
+        studentFrustrationCount: 0,
+        studentConfusionCount: 1,
+        positiveMomentsCount: 8,
+        conceptReExplanationCount: 1,
+        openEndedQuestions: 14,
+        closedEndedQuestions: 6,
+        rhetoricalQuestions: 3,
+      },
+      video: {
+        studentOnScreenAttentionPct: 0.88,
+        studentVisualEngagementScore: 8.5,
+        distractionEventsCount: 1,
+        confusionMomentsCount: 1,
+        tutorUsesVisualAids: true,
+        studentTakingNotesDuration: 22,
+      },
+      screen: {
+        activeTabFocusPct: 0.92,
+        tabSwitchesCount: 3,
+        whiteboardUsageMinutes: 25,
+        messagingAppDetected: false,
+        gamingDetected: false,
+      },
+      feedback: {
+        studentSatisfactionRating: 5,
+        feedbackText: 'Excellent session! My tutor explained everything clearly and made sure I understood before moving on. I feel much more confident now.',
+        tags: ['clear_explanations', 'patient', 'helpful_examples', 'encouraging'],
+      },
+    },
   },
   poor: {
     name: 'Poor Session',
     description: 'Low engagement, frustration, no follow-up',
     status: 'completed' as SessionStatus,
     duration: 60 as ScheduledDuration,
+    metrics: {
+      audio: {
+        tutorTalkRatio: 0.78,
+        studentTalkRatio: 0.12,
+        productiveSilenceRatio: 0.01,
+        awkwardPauseRatio: 0.09,
+        studentEngagementScore: 3.5,
+        tutorEnthusiasmScore: 4.0,
+        studentInitiatedQuestions: 1,
+        tutorChecksUnderstandingCount: 2,
+        tutorPositiveReinforcementCount: 1,
+        avgStudentResponseDelay: 6.5,
+        longPausesCount: 6,
+        studentFrustrationCount: 4,
+        studentConfusionCount: 5,
+        positiveMomentsCount: 2,
+        conceptReExplanationCount: 2,
+        openEndedQuestions: 4,
+        closedEndedQuestions: 14,
+        rhetoricalQuestions: 2,
+      },
+      video: {
+        studentOnScreenAttentionPct: 0.52,
+        studentVisualEngagementScore: 3.5,
+        distractionEventsCount: 8,
+        confusionMomentsCount: 6,
+        tutorUsesVisualAids: false,
+        studentTakingNotesDuration: 3,
+      },
+      screen: {
+        activeTabFocusPct: 0.65,
+        tabSwitchesCount: 15,
+        whiteboardUsageMinutes: 5,
+        messagingAppDetected: true,
+        gamingDetected: false,
+      },
+      feedback: {
+        studentSatisfactionRating: 2,
+        feedbackText: 'The session was confusing. My tutor talked too much and didn\'t really check if I understood. I felt lost.',
+        tags: ['too_fast', 'too_much_talking', 'didnt_check_understanding', 'confusing_examples'],
+      },
+    },
   },
   no_show: {
     name: 'No Show',
     description: 'Student or tutor didn\'t attend',
     status: 'no_show_student' as SessionStatus,
     duration: 60 as ScheduledDuration,
+    // No metrics for no-show sessions
   },
   technical: {
     name: 'Technical Issues',
     description: 'Connection problems, reduced duration',
     status: 'completed' as SessionStatus,
     duration: 45 as ScheduledDuration,
+    metrics: {
+      audio: {
+        tutorTalkRatio: 0.42,
+        studentTalkRatio: 0.33,
+        productiveSilenceRatio: 0.07,
+        awkwardPauseRatio: 0.18,
+        studentEngagementScore: 5.5,
+        tutorEnthusiasmScore: 6.0,
+        studentInitiatedQuestions: 3,
+        tutorChecksUnderstandingCount: 5,
+        tutorPositiveReinforcementCount: 4,
+        avgStudentResponseDelay: 4.0,
+        longPausesCount: 7,
+        studentFrustrationCount: 3,
+        studentConfusionCount: 2,
+        positiveMomentsCount: 3,
+        conceptReExplanationCount: 1,
+        openEndedQuestions: 8,
+        closedEndedQuestions: 8,
+        rhetoricalQuestions: 2,
+      },
+      video: {
+        studentOnScreenAttentionPct: 0.70,
+        studentVisualEngagementScore: 5.5,
+        distractionEventsCount: 5,
+        confusionMomentsCount: 3,
+        tutorUsesVisualAids: true,
+        studentTakingNotesDuration: 8,
+      },
+      screen: {
+        activeTabFocusPct: 0.75,
+        tabSwitchesCount: 10,
+        whiteboardUsageMinutes: 12,
+        messagingAppDetected: false,
+        gamingDetected: false,
+      },
+      feedback: {
+        studentSatisfactionRating: 3,
+        feedbackText: 'We had a lot of connection problems which made it hard to focus. The content was okay when we could hear each other.',
+        tags: ['technical_issues'],
+      },
+    },
   },
   first_success: {
     name: 'First Session Success',
     description: 'Strong first impression metrics',
     status: 'completed' as SessionStatus,
     duration: 60 as ScheduledDuration,
+    metrics: {
+      audio: {
+        tutorTalkRatio: 0.43,
+        studentTalkRatio: 0.44,
+        productiveSilenceRatio: 0.11,
+        awkwardPauseRatio: 0.02,
+        studentEngagementScore: 8.0,
+        tutorEnthusiasmScore: 9.0,
+        studentInitiatedQuestions: 6,
+        tutorChecksUnderstandingCount: 10,
+        tutorPositiveReinforcementCount: 12,
+        avgStudentResponseDelay: 2.5,
+        longPausesCount: 1,
+        studentFrustrationCount: 0,
+        studentConfusionCount: 1,
+        positiveMomentsCount: 9,
+        conceptReExplanationCount: 1,
+        openEndedQuestions: 15,
+        closedEndedQuestions: 7,
+        rhetoricalQuestions: 3,
+      },
+      video: {
+        studentOnScreenAttentionPct: 0.85,
+        studentVisualEngagementScore: 8.0,
+        distractionEventsCount: 2,
+        confusionMomentsCount: 1,
+        tutorUsesVisualAids: true,
+        studentTakingNotesDuration: 18,
+      },
+      screen: {
+        activeTabFocusPct: 0.90,
+        tabSwitchesCount: 4,
+        whiteboardUsageMinutes: 22,
+        messagingAppDetected: false,
+        gamingDetected: false,
+      },
+      feedback: {
+        studentSatisfactionRating: 5,
+        feedbackText: 'Great first session! My tutor was welcoming, patient, and really took the time to understand what I needed help with. Looking forward to our next session!',
+        tags: ['clear_explanations', 'patient', 'encouraging', 'made_learning_fun'],
+      },
+    },
   },
 };
 
@@ -252,11 +436,52 @@ export function SessionForm() {
 
   const handleTemplateSelect = (template: TemplateType) => {
     const templateData = SCENARIO_TEMPLATES[template];
+
+    // Update form data (status and duration)
     setFormData(prev => ({
       ...prev,
       status: templateData.status,
       scheduledDuration: templateData.duration,
     }));
+
+    // Apply metrics if available
+    if (templateData.metrics) {
+      // Apply audio metrics
+      if (templateData.metrics.audio) {
+        setAudioMetrics(prev => ({
+          ...prev,
+          ...templateData.metrics!.audio,
+        }));
+      }
+
+      // Apply video metrics
+      if (templateData.metrics.video) {
+        setVideoMetrics(prev => ({
+          ...prev,
+          enabled: true,
+          ...templateData.metrics!.video,
+        }));
+      }
+
+      // Apply screen metrics
+      if (templateData.metrics.screen) {
+        setScreenMetrics(prev => ({
+          ...prev,
+          enabled: true,
+          ...templateData.metrics!.screen,
+        }));
+      }
+
+      // Apply feedback
+      if (templateData.metrics.feedback) {
+        setFeedback(prev => ({
+          ...prev,
+          enabled: true,
+          ...templateData.metrics!.feedback,
+        }));
+      }
+    }
+
     toast.success(`Applied "${templateData.name}" template`);
   };
 

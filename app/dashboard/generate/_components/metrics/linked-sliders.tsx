@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,26 @@ export function LinkedSliders({ sliders, onChange, totalSum = 1.0 }: LinkedSlide
   const [localValues, setLocalValues] = useState<Record<string, number>>(
     sliders.reduce((acc, slider) => ({ ...acc, [slider.id]: slider.value }), {})
   );
+
+  // Create a stable dependency for the useEffect
+  const sliderValues = sliders.map(s => s.value).join(',');
+
+  // Update local values when sliders prop changes (e.g., from template selection)
+  useEffect(() => {
+    const newValues = sliders.reduce<Record<string, number>>(
+      (acc, slider) => ({ ...acc, [slider.id]: slider.value }),
+      {}
+    );
+
+    // Only update if values have actually changed to avoid unnecessary re-renders
+    const hasChanged = Object.keys(newValues).some(
+      key => Math.abs((newValues[key] || 0) - (localValues[key] || 0)) > 0.001
+    );
+
+    if (hasChanged) {
+      setLocalValues(newValues);
+    }
+  }, [sliderValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSliderChange = (id: string, newValue: number) => {
     const currentSum = Object.values(localValues).reduce((sum, val) => sum + val, 0);
