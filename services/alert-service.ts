@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { alerts, sessions, sessionAudioMetrics } from '@/lib/db';
-import { eq, and, desc, gte, lte, sql, count } from 'drizzle-orm';
+import { eq, and, desc, gte, lte, sql, count, inArray } from 'drizzle-orm';
 import type { AlertTypeType, AlertSeverityType } from '@/lib/db/types';
 
 // ============================================
@@ -280,20 +280,16 @@ export async function checkAndGenerateAlerts(tutorId: string): Promise<Alert[]> 
       const sessionsWithChecks = recentSessions.filter(s => s.tutor_talk_ratio !== null);
 
       if (sessionsWithChecks.length > 0) {
+        // Use the session IDs from recentSessions instead of a subquery
+        const sessionIds = recentSessions.map(s => s.session_id);
+
         const understandingChecks = await db
           .select({
             avg_checks: sql<number>`AVG(${sessionAudioMetrics.tutor_checks_understanding_count})`,
           })
           .from(sessionAudioMetrics)
           .where(
-            sql`${sessionAudioMetrics.session_id} IN (
-              SELECT ${sessions.id} FROM ${sessions}
-              WHERE ${sessions.tutor_id} = ${tutorId}
-                AND ${sessions.status} = 'completed'
-                AND ${sessions.completed_at} >= ${thirtyDaysAgo}
-              ORDER BY ${sessions.completed_at} DESC
-              LIMIT 10
-            )`
+            inArray(sessionAudioMetrics.session_id, sessionIds)
           );
 
         const avgChecks = understandingChecks[0]?.avg_checks || 0;
