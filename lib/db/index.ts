@@ -11,7 +11,9 @@ import * as alerts from './schema/alerts';
 import * as churn from './schema/churn';
 
 // Database connection
-const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+// Use DATABASE_URL if available (production), otherwise build from individual vars (local dev)
+const connectionString = process.env.DATABASE_URL ||
+  `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
 
 // Create postgres client
 const client = postgres(connectionString);
