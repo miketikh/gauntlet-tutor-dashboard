@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { sessions, users, subjects, alerts, sessionAudioMetrics, sessionFeedback } from '@/lib/db';
+import { sessions, users, subjects, alerts, sessionAudioMetrics, sessionFeedback, tutorInsights } from '@/lib/db';
 import { eq, desc, and, sql, gte, lte, count, avg, isNull, inArray } from 'drizzle-orm';
 
 // ============================================
@@ -29,6 +29,17 @@ export interface TutorNeedingAttention {
   overall_score: number;
   active_alert_count: number;
   churn_risk_level: 'low' | 'medium' | 'high';
+  top_alerts: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: 'info' | 'warning' | 'critical';
+  }>;
+  top_insights: Array<{
+    id: string;
+    display_text: string;
+    insight_type: 'strength' | 'growth_area' | 'achievement';
+  }>;
 }
 
 export interface RecentSession {
@@ -40,6 +51,40 @@ export interface RecentSession {
   student_engagement_score: number | null;
   student_satisfaction_rating: number | null;
   is_flagged: boolean;
+}
+
+export interface ActionableAlert {
+  id: string;
+  tutor_id: string;
+  tutor_name: string;
+  title: string;
+  description: string;
+  severity: 'info' | 'warning' | 'critical';
+  triggered_date: Date;
+  session_id: string | null;
+  overall_score: number | null;
+  churn_risk_level: 'low' | 'medium' | 'high';
+}
+
+export interface ActionableInsight {
+  id: string;
+  tutor_id: string;
+  tutor_name: string;
+  display_text: string;
+  insight_type: 'strength' | 'growth_area' | 'achievement';
+  category: string | null;
+  metric_value: string | null;
+  detected_at: Date;
+  overall_score: number | null;
+  churn_risk_level: 'low' | 'medium' | 'high';
+}
+
+export interface ActionCenterStats {
+  total_critical_alerts: number;
+  total_warnings: number;
+  total_growth_opportunities: number;
+  tutors_at_risk: number;
+  avg_response_time_hours: number | null;
 }
 
 // ============================================
@@ -344,6 +389,74 @@ export async function getTutorsNeedingAttention(limit: number = 3): Promise<Tuto
       ])
     );
 
+    // Fetch top 2 alerts per tutor (prioritize critical severity)
+    const topAlertsData = await db
+      .select({
+        id: alerts.id,
+        tutor_id: alerts.tutor_id,
+        title: alerts.title,
+        description: alerts.description,
+        severity: alerts.severity,
+        triggered_date: alerts.triggered_date,
+      })
+      .from(alerts)
+      .where(
+        and(
+          eq(alerts.acknowledged, false),
+          eq(alerts.resolved, false),
+          inArray(alerts.tutor_id, tutorIds)
+        )
+      )
+      .orderBy(
+        desc(sql`CASE ${alerts.severity} WHEN 'critical' THEN 3 WHEN 'warning' THEN 2 ELSE 1 END`),
+        desc(alerts.triggered_date)
+      );
+
+    // Group alerts by tutor_id and take top 2
+    const alertsByTutor = new Map<string, typeof topAlertsData>();
+    topAlertsData.forEach((alert) => {
+      if (!alertsByTutor.has(alert.tutor_id)) {
+        alertsByTutor.set(alert.tutor_id, []);
+      }
+      const tutorAlerts = alertsByTutor.get(alert.tutor_id)!;
+      if (tutorAlerts.length < 2) {
+        tutorAlerts.push(alert);
+      }
+    });
+
+    // Fetch top 2 insights per tutor (prioritize growth_area)
+    const topInsightsData = await db
+      .select({
+        id: tutorInsights.id,
+        tutor_id: tutorInsights.tutor_id,
+        display_text: tutorInsights.display_text,
+        insight_type: tutorInsights.insight_type,
+        detected_at: tutorInsights.detected_at,
+      })
+      .from(tutorInsights)
+      .where(
+        and(
+          eq(tutorInsights.is_active, true),
+          inArray(tutorInsights.tutor_id, tutorIds)
+        )
+      )
+      .orderBy(
+        desc(sql`CASE ${tutorInsights.insight_type} WHEN 'growth_area' THEN 3 WHEN 'strength' THEN 2 ELSE 1 END`),
+        desc(tutorInsights.detected_at)
+      );
+
+    // Group insights by tutor_id and take top 2
+    const insightsByTutor = new Map<string, typeof topInsightsData>();
+    topInsightsData.forEach((insight) => {
+      if (!insightsByTutor.has(insight.tutor_id)) {
+        insightsByTutor.set(insight.tutor_id, []);
+      }
+      const tutorInsights = insightsByTutor.get(insight.tutor_id)!;
+      if (tutorInsights.length < 2) {
+        tutorInsights.push(insight);
+      }
+    });
+
     return tutorScores.map((t) => {
       const noShows = Number(t.no_show_count || 0);
       const reschedules = Number(t.reschedule_count || 0);
@@ -358,12 +471,27 @@ export async function getTutorsNeedingAttention(limit: number = 3): Promise<Tuto
         churnRiskLevel = 'low';
       }
 
+      // Get top alerts and insights for this tutor
+      const tutorAlerts = alertsByTutor.get(t.user_id) || [];
+      const tutorInsights = insightsByTutor.get(t.user_id) || [];
+
       return {
         user_id: t.user_id,
         name: t.name,
         overall_score: Number(t.overall_score ?? 0),
         active_alert_count: alertMap.get(t.user_id) || 0,
         churn_risk_level: churnRiskLevel,
+        top_alerts: tutorAlerts.map((a) => ({
+          id: a.id,
+          title: a.title,
+          description: a.description,
+          severity: a.severity as 'info' | 'warning' | 'critical',
+        })),
+        top_insights: tutorInsights.map((i) => ({
+          id: i.id,
+          display_text: i.display_text,
+          insight_type: i.insight_type as 'strength' | 'growth_area' | 'achievement',
+        })),
       };
     });
   } catch (error) {
@@ -420,5 +548,348 @@ export async function getRecentSessions(limit: number = 20): Promise<RecentSessi
   } catch (error) {
     console.error('Error fetching recent sessions:', error);
     return [];
+  }
+}
+
+/**
+ * Get actionable alerts across all tutors for Action Center
+ * @param severity - Optional filter by severity ('critical', 'warning', 'info')
+ * @param limit - Number of alerts to return (default: 50)
+ * @returns Array of actionable alerts with tutor context
+ */
+export async function getActionableAlerts(
+  severity?: 'critical' | 'warning' | 'info',
+  limit: number = 50
+): Promise<ActionableAlert[]> {
+  if (limit <= 0) {
+    throw new Error('Limit must be greater than 0');
+  }
+
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Build the where clause
+    const whereConditions = [
+      eq(alerts.acknowledged, false),
+      eq(alerts.resolved, false),
+    ];
+
+    if (severity) {
+      whereConditions.push(eq(alerts.severity, severity));
+    }
+
+    // Fetch alerts with tutor info
+    const alertsWithTutors = await db
+      .select({
+        id: alerts.id,
+        tutor_id: alerts.tutor_id,
+        tutor_name: users.name,
+        title: alerts.title,
+        description: alerts.description,
+        severity: alerts.severity,
+        triggered_date: alerts.triggered_date,
+        session_id: alerts.session_id,
+      })
+      .from(alerts)
+      .innerJoin(users, eq(alerts.tutor_id, users.id))
+      .where(and(...whereConditions))
+      .orderBy(
+        desc(sql`CASE ${alerts.severity} WHEN 'critical' THEN 3 WHEN 'warning' THEN 2 ELSE 1 END`),
+        desc(alerts.triggered_date)
+      )
+      .limit(limit);
+
+    if (alertsWithTutors.length === 0) {
+      return [];
+    }
+
+    // Get tutor IDs
+    const tutorIds = [...new Set(alertsWithTutors.map(a => a.tutor_id))];
+
+    // Get tutor scores and churn risk info
+    const tutorMetrics = await db
+      .select({
+        tutor_id: sessions.tutor_id,
+        overall_score: avg(sessions.overall_session_score),
+        no_show_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'no_show_tutor' THEN ${sessions.id} END)`,
+        reschedule_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'rescheduled' AND ${sessions.rescheduled_by} = 'tutor' THEN ${sessions.id} END)`,
+      })
+      .from(sessions)
+      .where(
+        and(
+          inArray(sessions.tutor_id, tutorIds),
+          gte(sessions.scheduled_start, thirtyDaysAgo),
+          eq(sessions.status, 'completed')
+        )
+      )
+      .groupBy(sessions.tutor_id);
+
+    const metricsMap = new Map(
+      tutorMetrics.map(m => [
+        m.tutor_id,
+        {
+          overall_score: Number(m.overall_score ?? 0),
+          no_show_count: Number(m.no_show_count ?? 0),
+          reschedule_count: Number(m.reschedule_count ?? 0),
+        }
+      ])
+    );
+
+    return alertsWithTutors.map(alert => {
+      const metrics = metricsMap.get(alert.tutor_id);
+      const noShows = metrics?.no_show_count ?? 0;
+      const reschedules = metrics?.reschedule_count ?? 0;
+
+      let churnRiskLevel: 'low' | 'medium' | 'high';
+      if (noShows >= 2 || reschedules >= 4) {
+        churnRiskLevel = 'high';
+      } else if (noShows === 1 || reschedules >= 2) {
+        churnRiskLevel = 'medium';
+      } else {
+        churnRiskLevel = 'low';
+      }
+
+      return {
+        id: alert.id,
+        tutor_id: alert.tutor_id,
+        tutor_name: alert.tutor_name,
+        title: alert.title,
+        description: alert.description,
+        severity: alert.severity as 'info' | 'warning' | 'critical',
+        triggered_date: alert.triggered_date,
+        session_id: alert.session_id,
+        overall_score: metrics?.overall_score ?? null,
+        churn_risk_level: churnRiskLevel,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching actionable alerts:', error);
+    return [];
+  }
+}
+
+/**
+ * Get actionable insights across all tutors for Action Center
+ * @param type - Optional filter by insight type ('growth_area', 'strength', 'achievement')
+ * @param limit - Number of insights to return (default: 50)
+ * @returns Array of actionable insights with tutor context
+ */
+export async function getActionableInsights(
+  type?: 'growth_area' | 'strength' | 'achievement',
+  limit: number = 50
+): Promise<ActionableInsight[]> {
+  if (limit <= 0) {
+    throw new Error('Limit must be greater than 0');
+  }
+
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Build the where clause
+    const whereConditions = [eq(tutorInsights.is_active, true)];
+
+    if (type) {
+      whereConditions.push(eq(tutorInsights.insight_type, type));
+    }
+
+    // Fetch insights with tutor info
+    const insightsWithTutors = await db
+      .select({
+        id: tutorInsights.id,
+        tutor_id: tutorInsights.tutor_id,
+        tutor_name: users.name,
+        display_text: tutorInsights.display_text,
+        insight_type: tutorInsights.insight_type,
+        category: tutorInsights.category,
+        metric_value: tutorInsights.metric_value,
+        detected_at: tutorInsights.detected_at,
+      })
+      .from(tutorInsights)
+      .innerJoin(users, eq(tutorInsights.tutor_id, users.id))
+      .where(and(...whereConditions))
+      .orderBy(
+        desc(sql`CASE ${tutorInsights.insight_type} WHEN 'growth_area' THEN 3 WHEN 'achievement' THEN 2 ELSE 1 END`),
+        desc(tutorInsights.detected_at)
+      )
+      .limit(limit);
+
+    if (insightsWithTutors.length === 0) {
+      return [];
+    }
+
+    // Get tutor IDs
+    const tutorIds = [...new Set(insightsWithTutors.map(i => i.tutor_id))];
+
+    // Get tutor scores and churn risk info
+    const tutorMetrics = await db
+      .select({
+        tutor_id: sessions.tutor_id,
+        overall_score: avg(sessions.overall_session_score),
+        no_show_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'no_show_tutor' THEN ${sessions.id} END)`,
+        reschedule_count: sql<number>`COUNT(DISTINCT CASE WHEN ${sessions.status} = 'rescheduled' AND ${sessions.rescheduled_by} = 'tutor' THEN ${sessions.id} END)`,
+      })
+      .from(sessions)
+      .where(
+        and(
+          inArray(sessions.tutor_id, tutorIds),
+          gte(sessions.scheduled_start, thirtyDaysAgo),
+          eq(sessions.status, 'completed')
+        )
+      )
+      .groupBy(sessions.tutor_id);
+
+    const metricsMap = new Map(
+      tutorMetrics.map(m => [
+        m.tutor_id,
+        {
+          overall_score: Number(m.overall_score ?? 0),
+          no_show_count: Number(m.no_show_count ?? 0),
+          reschedule_count: Number(m.reschedule_count ?? 0),
+        }
+      ])
+    );
+
+    return insightsWithTutors.map(insight => {
+      const metrics = metricsMap.get(insight.tutor_id);
+      const noShows = metrics?.no_show_count ?? 0;
+      const reschedules = metrics?.reschedule_count ?? 0;
+
+      let churnRiskLevel: 'low' | 'medium' | 'high';
+      if (noShows >= 2 || reschedules >= 4) {
+        churnRiskLevel = 'high';
+      } else if (noShows === 1 || reschedules >= 2) {
+        churnRiskLevel = 'medium';
+      } else {
+        churnRiskLevel = 'low';
+      }
+
+      return {
+        id: insight.id,
+        tutor_id: insight.tutor_id,
+        tutor_name: insight.tutor_name,
+        display_text: insight.display_text,
+        insight_type: insight.insight_type as 'strength' | 'growth_area' | 'achievement',
+        category: insight.category,
+        metric_value: insight.metric_value,
+        detected_at: insight.detected_at,
+        overall_score: metrics?.overall_score ?? null,
+        churn_risk_level: churnRiskLevel,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching actionable insights:', error);
+    return [];
+  }
+}
+
+/**
+ * Get Action Center statistics
+ * @returns Statistics about alerts, insights, and at-risk tutors
+ */
+export async function getActionCenterStats(): Promise<ActionCenterStats> {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Count critical alerts
+    const criticalAlertsResult = await db
+      .select({ count: count() })
+      .from(alerts)
+      .where(
+        and(
+          eq(alerts.severity, 'critical'),
+          eq(alerts.acknowledged, false),
+          eq(alerts.resolved, false)
+        )
+      );
+
+    const totalCriticalAlerts = Number(criticalAlertsResult[0]?.count ?? 0);
+
+    // Count warning alerts
+    const warningAlertsResult = await db
+      .select({ count: count() })
+      .from(alerts)
+      .where(
+        and(
+          eq(alerts.severity, 'warning'),
+          eq(alerts.acknowledged, false),
+          eq(alerts.resolved, false)
+        )
+      );
+
+    const totalWarnings = Number(warningAlertsResult[0]?.count ?? 0);
+
+    // Count growth opportunities
+    const growthInsightsResult = await db
+      .select({ count: count() })
+      .from(tutorInsights)
+      .where(
+        and(
+          eq(tutorInsights.insight_type, 'growth_area'),
+          eq(tutorInsights.is_active, true)
+        )
+      );
+
+    const totalGrowthOpportunities = Number(growthInsightsResult[0]?.count ?? 0);
+
+    // Count tutors at risk (with active alerts or churn risk)
+    const tutorsAtRiskResult = await db
+      .select({
+        tutor_id: sessions.tutor_id,
+        noShowCount: sql<number>`COUNT(CASE WHEN ${sessions.status} = 'no_show_tutor' THEN 1 END)`,
+        rescheduleCount: sql<number>`COUNT(CASE WHEN ${sessions.rescheduled_by} = 'tutor' THEN 1 END)`,
+      })
+      .from(sessions)
+      .where(
+        and(
+          gte(sessions.scheduled_start, thirtyDaysAgo),
+          lte(sessions.scheduled_start, new Date())
+        )
+      )
+      .groupBy(sessions.tutor_id);
+
+    const tutorsAtRisk = tutorsAtRiskResult.filter(
+      (t) => Number(t.noShowCount) >= 2 || Number(t.rescheduleCount) >= 4
+    ).length;
+
+    // Calculate average response time for resolved alerts (in hours)
+    const resolvedAlertsResult = await db
+      .select({
+        triggered_date: alerts.triggered_date,
+        resolved_at: alerts.resolved_at,
+      })
+      .from(alerts)
+      .where(
+        and(
+          eq(alerts.resolved, true),
+          sql`${alerts.resolved_at} IS NOT NULL`,
+          gte(alerts.triggered_date, thirtyDaysAgo)
+        )
+      );
+
+    let avgResponseTimeHours: number | null = null;
+    if (resolvedAlertsResult.length > 0) {
+      const totalHours = resolvedAlertsResult.reduce((sum, alert) => {
+        if (alert.resolved_at) {
+          const diff = alert.resolved_at.getTime() - alert.triggered_date.getTime();
+          return sum + (diff / (1000 * 60 * 60)); // Convert to hours
+        }
+        return sum;
+      }, 0);
+      avgResponseTimeHours = totalHours / resolvedAlertsResult.length;
+    }
+
+    return {
+      total_critical_alerts: totalCriticalAlerts,
+      total_warnings: totalWarnings,
+      total_growth_opportunities: totalGrowthOpportunities,
+      tutors_at_risk: tutorsAtRisk,
+      avg_response_time_hours: avgResponseTimeHours,
+    };
+  } catch (error) {
+    console.error('Error fetching action center stats:', error);
+    throw new Error('Failed to fetch action center stats');
   }
 }

@@ -3,10 +3,11 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScoreBadge } from "@/components/ui/score-badge"
 import { Badge } from "@/components/ui/badge"
-import { User, Calendar, X, AlertTriangle } from "lucide-react"
+import { User, Calendar, X, AlertTriangle, AlertCircle, TrendingUp, Sparkles } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 type TutorsPageProps = {
   searchParams: Promise<{ churnRisk?: string }>
@@ -58,19 +59,47 @@ export default async function TutorsListPage({ searchParams }: TutorsPageProps) 
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-muted">
                         <User className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg flex items-center gap-2">
                           {tutor.name}
                           {(tutor.churn_risk_level === 'medium' || tutor.churn_risk_level === 'high') && (
                             <span className="text-base" title={`${tutor.churn_risk_level} churn risk`}>⚠️</span>
                           )}
                         </CardTitle>
-                        <p className="text-xs text-muted-foreground">{tutor.email}</p>
+                        <p className="text-xs text-muted-foreground truncate">{tutor.email}</p>
+
+                        {/* Insight/Alert Badges */}
+                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                          {tutor.overall_score !== null && (
+                            <ScoreBadge score={tutor.overall_score} size="sm" />
+                          )}
+                          {tutor.critical_alert_count > 0 && (
+                            <Badge variant="destructive" className="text-xs gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              {tutor.critical_alert_count} critical
+                            </Badge>
+                          )}
+                          {tutor.alert_count > 0 && tutor.critical_alert_count === 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 border-yellow-500 text-yellow-700 dark:text-yellow-500">
+                              <AlertTriangle className="h-3 w-3" />
+                              {tutor.alert_count} alert{tutor.alert_count > 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                          {tutor.growth_insight_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 border-blue-500 text-blue-700 dark:text-blue-400">
+                              <TrendingUp className="h-3 w-3" />
+                              {tutor.growth_insight_count} growth
+                            </Badge>
+                          )}
+                          {tutor.strength_insight_count > 0 && (
+                            <Badge variant="outline" className="text-xs gap-1 border-green-500 text-green-700 dark:text-green-400">
+                              <Sparkles className="h-3 w-3" />
+                              {tutor.strength_insight_count} strength{tutor.strength_insight_count > 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {tutor.overall_score !== null && (
-                      <ScoreBadge score={tutor.overall_score} size="sm" />
-                    )}
                   </div>
                 </CardHeader>
                 <CardContent>

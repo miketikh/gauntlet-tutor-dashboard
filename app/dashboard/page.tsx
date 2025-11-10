@@ -7,6 +7,8 @@ import { PlatformMetricsSkeleton } from "@/app/dashboard/_components/platform-me
 import { TutorScoreboard } from "@/app/dashboard/_components/tutor-scoreboard"
 import { LoadingCard } from "@/components/ui/loading-card"
 import { RecentSessionsFeed } from "@/app/dashboard/_components/recent-sessions-feed"
+import { CriticalAlertsSummary } from "@/app/dashboard/_components/critical-alerts-summary"
+import { TopInsightsSummary } from "@/app/dashboard/_components/top-insights-summary"
 import { Button } from "@/components/ui/button"
 
 export default async function DashboardPage() {
@@ -21,6 +23,16 @@ export default async function DashboardPage() {
         <Suspense fallback={<PlatformMetricsSkeleton />}>
           <PlatformMetricsBar />
         </Suspense>
+
+        {/* Action Center Summary - Critical Alerts & Top Insights */}
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <Suspense fallback={<LoadingCard variant="list" count={5} />}>
+            <CriticalAlertsSummary />
+          </Suspense>
+          <Suspense fallback={<LoadingCard variant="list" count={5} />}>
+            <TopInsightsSummary />
+          </Suspense>
+        </div>
 
         {/* Tutor Scoreboard */}
         <div className="mt-8">

@@ -54,6 +54,10 @@ export interface TutorWithMetrics {
   churn_risk_level: 'low' | 'medium' | 'high';
   no_show_count_30d: number;
   reschedule_count_30d: number;
+  alert_count: number;
+  critical_alert_count: number;
+  growth_insight_count: number;
+  strength_insight_count: number;
 }
 
 export interface TutorDetailData {
@@ -347,6 +351,53 @@ export async function getAllTutorsWithMetrics(filters?: {
       .groupBy(tutors.user_id, users.name, users.email, tutors.member_since, tutors.bio, tutors.hourly_rate)
       .orderBy(desc(tutors.member_since));
 
+    // Get tutor IDs for alert/insight queries
+    const tutorIds = results.map(r => r.user_id);
+
+    // Fetch alert counts (total and critical)
+    const alertCounts = tutorIds.length > 0 ? await db
+      .select({
+        tutor_id: alerts.tutor_id,
+        total_alerts: count(alerts.id),
+        critical_alerts: sql<number>`COUNT(CASE WHEN ${alerts.severity} = 'critical' THEN 1 END)`,
+      })
+      .from(alerts)
+      .where(
+        and(
+          eq(alerts.acknowledged, false),
+          eq(alerts.resolved, false),
+          sql`${alerts.tutor_id} = ANY(${tutorIds})`
+        )
+      )
+      .groupBy(alerts.tutor_id) : [];
+
+    // Fetch insight counts (by type)
+    const insightCounts = tutorIds.length > 0 ? await db
+      .select({
+        tutor_id: tutorInsights.tutor_id,
+        growth_insights: sql<number>`COUNT(CASE WHEN ${tutorInsights.insight_type} = 'growth_area' THEN 1 END)`,
+        strength_insights: sql<number>`COUNT(CASE WHEN ${tutorInsights.insight_type} = 'strength' THEN 1 END)`,
+      })
+      .from(tutorInsights)
+      .where(
+        and(
+          eq(tutorInsights.is_active, true),
+          sql`${tutorInsights.tutor_id} = ANY(${tutorIds})`
+        )
+      )
+      .groupBy(tutorInsights.tutor_id) : [];
+
+    // Create lookup maps
+    const alertMap = new Map(alertCounts.map(a => [a.tutor_id, {
+      total: Number(a.total_alerts || 0),
+      critical: Number(a.critical_alerts || 0)
+    }]));
+
+    const insightMap = new Map(insightCounts.map(i => [i.tutor_id, {
+      growth: Number(i.growth_insights || 0),
+      strength: Number(i.strength_insights || 0)
+    }]));
+
     // Calculate churn risk level and format results
     const tutorsWithMetrics: TutorWithMetrics[] = results.map((result) => {
       const noShows = Number(result.no_show_count_30d || 0);
@@ -362,6 +413,10 @@ export async function getAllTutorsWithMetrics(filters?: {
         churnRiskLevel = 'low';
       }
 
+      // Get alert and insight counts
+      const alertData = alertMap.get(result.user_id) || { total: 0, critical: 0 };
+      const insightData = insightMap.get(result.user_id) || { growth: 0, strength: 0 };
+
       return {
         user_id: result.user_id,
         name: result.name,
@@ -374,6 +429,10 @@ export async function getAllTutorsWithMetrics(filters?: {
         churn_risk_level: churnRiskLevel,
         no_show_count_30d: noShows,
         reschedule_count_30d: reschedules,
+        alert_count: alertData.total,
+        critical_alert_count: alertData.critical,
+        growth_insight_count: insightData.growth,
+        strength_insight_count: insightData.strength,
       };
     });
 

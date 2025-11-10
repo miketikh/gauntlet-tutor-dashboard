@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, LogOut, Users, GraduationCap, FileText, Settings, Database } from 'lucide-react';
+import { BarChart3, LogOut, Users, GraduationCap, FileText, Settings, Database, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,7 @@ export function DashboardNav({ userEmail, onSignOut }: DashboardNavProps) {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
+    { href: '/dashboard/action-center', label: 'Action Center', icon: AlertCircle },
     { href: '/dashboard/tutors', label: 'Tutors', icon: GraduationCap },
     { href: '/dashboard/students', label: 'Students', icon: Users },
     { href: '/dashboard/sessions', label: 'Sessions', icon: FileText },
