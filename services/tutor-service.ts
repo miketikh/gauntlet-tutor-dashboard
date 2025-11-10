@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { tutors, users, tutorSubjects, subjects, sessions, tutorPerformanceSnapshots, sessionAudioMetrics, sessionFeedback, alerts, tutorInsights, coachingNotes } from '@/lib/db';
-import { eq, and, desc, count, gte, lte, sql, avg } from 'drizzle-orm';
+import { eq, and, desc, count, gte, lte, sql, avg, inArray } from 'drizzle-orm';
 import type { SnapshotPeriodTypeType } from '@/lib/db/types';
 import { withCache, generateCacheKey, getCacheManager, CACHE_PREFIXES, CACHE_TTL } from '@/lib/cache';
 import type { DateRange } from './platform-service';
@@ -366,7 +366,7 @@ export async function getAllTutorsWithMetrics(filters?: {
         and(
           eq(alerts.acknowledged, false),
           eq(alerts.resolved, false),
-          sql`${alerts.tutor_id} = ANY(${tutorIds})`
+          inArray(alerts.tutor_id, tutorIds)
         )
       )
       .groupBy(alerts.tutor_id) : [];
@@ -382,7 +382,7 @@ export async function getAllTutorsWithMetrics(filters?: {
       .where(
         and(
           eq(tutorInsights.is_active, true),
-          sql`${tutorInsights.tutor_id} = ANY(${tutorIds})`
+          inArray(tutorInsights.tutor_id, tutorIds)
         )
       )
       .groupBy(tutorInsights.tutor_id) : [];
