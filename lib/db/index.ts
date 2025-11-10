@@ -10,13 +10,13 @@ import * as metrics from './schema/metrics';
 import * as alerts from './schema/alerts';
 import * as churn from './schema/churn';
 
-// Database connection
-// Use DATABASE_URL if available (production), otherwise build from individual vars (local dev)
-const connectionString = process.env.DATABASE_URL ||
-  `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+// Database connection - MUST have DATABASE_URL set
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
 
 // Create postgres client
-const client = postgres(connectionString);
+const client = postgres(process.env.DATABASE_URL);
 
 // Create drizzle instance with all schemas
 export const db = drizzle(client, {
